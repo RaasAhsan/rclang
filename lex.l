@@ -19,8 +19,23 @@ WHITESPACE        [ \t\n]
 %}
 
 %%
-int                                { return INT; }
 return                             { return RETURN; }
+register                           { return REGISTER; }
+typedef                            { return TYPEDEF; }
+auto                               { return AUTO; }
+static                             { return STATIC; }
+extern                             { return EXTERN; }
+volatile                           { return VOLATILE; }
+const                              { return CONST; }
+void                               { return VOID; } 
+char                               { return CHAR; } 
+short                              { return SHORT; } 
+int                                { return INT; } 
+long                               { return LONG; } 
+float                              { return FLOAT; }
+double                             { return DOUBLE; } 
+signed                             { return SIGNED; } 
+unsigned                           { return UNSIGNED; }
 
 {IDENTIFIER}                       { return IDENTIFIER; }
 

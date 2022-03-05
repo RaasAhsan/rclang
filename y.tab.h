@@ -39,33 +39,57 @@
    /* Put the tokens into the symbol table, so that GDB and other debuggers
       know about them.  */
    enum yytokentype {
-     AUTO = 258,
-     DOUBLE = 259,
-     INT = 260,
-     STRUCT = 261,
-     BREAK = 262,
-     ELSE = 263,
-     LONG = 264,
-     RETURN = 265,
-     IF = 266,
-     IDENTIFIER = 267,
-     INTEGER_CONSTANT = 268,
-     STRING_LITERAL = 269
+     STRUCT = 258,
+     BREAK = 259,
+     ELSE = 260,
+     RETURN = 261,
+     IF = 262,
+     AUTO = 263,
+     TYPEDEF = 264,
+     EXTERN = 265,
+     STATIC = 266,
+     REGISTER = 267,
+     CONST = 268,
+     VOLATILE = 269,
+     VOID = 270,
+     CHAR = 271,
+     SHORT = 272,
+     INT = 273,
+     LONG = 274,
+     FLOAT = 275,
+     DOUBLE = 276,
+     SIGNED = 277,
+     UNSIGNED = 278,
+     IDENTIFIER = 279,
+     INTEGER_CONSTANT = 280,
+     STRING_LITERAL = 281
    };
 #endif
 /* Tokens.  */
-#define AUTO 258
-#define DOUBLE 259
-#define INT 260
-#define STRUCT 261
-#define BREAK 262
-#define ELSE 263
-#define LONG 264
-#define RETURN 265
-#define IF 266
-#define IDENTIFIER 267
-#define INTEGER_CONSTANT 268
-#define STRING_LITERAL 269
+#define STRUCT 258
+#define BREAK 259
+#define ELSE 260
+#define RETURN 261
+#define IF 262
+#define AUTO 263
+#define TYPEDEF 264
+#define EXTERN 265
+#define STATIC 266
+#define REGISTER 267
+#define CONST 268
+#define VOLATILE 269
+#define VOID 270
+#define CHAR 271
+#define SHORT 272
+#define INT 273
+#define LONG 274
+#define FLOAT 275
+#define DOUBLE 276
+#define SIGNED 277
+#define UNSIGNED 278
+#define IDENTIFIER 279
+#define INTEGER_CONSTANT 280
+#define STRING_LITERAL 281
 
 
 
