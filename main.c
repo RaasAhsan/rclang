@@ -1,7 +1,8 @@
 #include <stdio.h>
 
-extern int yylex();
+// extern int yylex();
 extern FILE* yyin;
+extern int yyparse();
 
 int yywrap() {
     return 1;
@@ -15,10 +16,7 @@ int main() {
     }
 
     yyin = f;
-    int token;
-    while ((token = yylex())) {
-        printf("%d\n", token);
-    }
+    yyparse();
 
     fclose(f);
 
