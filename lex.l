@@ -50,6 +50,9 @@ unsigned                           { return UNSIGNED; }
 "}"                                { return '}'; }
 ";"                                { return ';'; }
 "*"                                { return '*'; }
+","                                { return ','; }
+"="                                { return '='; }
+
 
 {WHITESPACE}                       {}
 

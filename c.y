@@ -36,7 +36,24 @@ external_declaration
     | declaration
     ;
 
-declaration: RETURN;
+declaration
+    : declaration_specifiers ';'
+    | declaration_specifiers init_declarator_list ';'
+    ;
+
+init_declarator_list
+    : init_declarator
+    | init_declarator_list ',' init_declarator
+    ;
+
+init_declarator
+    : declarator
+    | declarator '=' initializer
+    ;
+
+initializer
+    : assignment_expression
+    ;
 
 function_definition
     : declaration_specifiers declarator declaration_list compound_statement 
@@ -83,7 +100,44 @@ declarator
     : IDENTIFIER
     ;
 
-declaration_list: INT;
+declaration_list
+    : declaration
+    | declaration_list declaration
+    ;
 
-compound_statement: CHAR;
+/* Statements */
+
+statement
+    : compound_statement
+    ;
+
+statement_list
+    : statement
+    | statement_list statement
+    ;
+
+compound_statement
+    : '{' declaration_list statement_list '}'
+    | '{' declaration_list '}'
+    | '{' statement_list '}'
+    | '{' '}'
+    ;
+
+/* Expressions */
+
+expression
+    : assignment_expression
+    | expression ',' assignment_expression
+    ;
+
+assignment_expression
+    : primary_expression
+    ;
+
+primary_expression
+    : IDENTIFIER
+    | STRING_LITERAL
+    | '(' expression ')'
+    ;
+
 %%
