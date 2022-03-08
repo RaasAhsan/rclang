@@ -40,56 +40,60 @@
       know about them.  */
    enum yytokentype {
      STRUCT = 258,
-     BREAK = 259,
+     IF = 259,
      ELSE = 260,
-     RETURN = 261,
-     IF = 262,
-     AUTO = 263,
-     TYPEDEF = 264,
-     EXTERN = 265,
-     STATIC = 266,
-     REGISTER = 267,
-     CONST = 268,
-     VOLATILE = 269,
-     VOID = 270,
-     CHAR = 271,
-     SHORT = 272,
-     INT = 273,
-     LONG = 274,
-     FLOAT = 275,
-     DOUBLE = 276,
-     SIGNED = 277,
-     UNSIGNED = 278,
-     IDENTIFIER = 279,
-     INTEGER_CONSTANT = 280,
-     STRING_LITERAL = 281
+     AUTO = 261,
+     TYPEDEF = 262,
+     EXTERN = 263,
+     STATIC = 264,
+     REGISTER = 265,
+     CONST = 266,
+     VOLATILE = 267,
+     VOID = 268,
+     CHAR = 269,
+     SHORT = 270,
+     INT = 271,
+     LONG = 272,
+     FLOAT = 273,
+     DOUBLE = 274,
+     SIGNED = 275,
+     UNSIGNED = 276,
+     GOTO = 277,
+     CONTINUE = 278,
+     RETURN = 279,
+     BREAK = 280,
+     IDENTIFIER = 281,
+     CONSTANT = 282,
+     STRING_LITERAL = 283
    };
 #endif
 /* Tokens.  */
 #define STRUCT 258
-#define BREAK 259
+#define IF 259
 #define ELSE 260
-#define RETURN 261
-#define IF 262
-#define AUTO 263
-#define TYPEDEF 264
-#define EXTERN 265
-#define STATIC 266
-#define REGISTER 267
-#define CONST 268
-#define VOLATILE 269
-#define VOID 270
-#define CHAR 271
-#define SHORT 272
-#define INT 273
-#define LONG 274
-#define FLOAT 275
-#define DOUBLE 276
-#define SIGNED 277
-#define UNSIGNED 278
-#define IDENTIFIER 279
-#define INTEGER_CONSTANT 280
-#define STRING_LITERAL 281
+#define AUTO 261
+#define TYPEDEF 262
+#define EXTERN 263
+#define STATIC 264
+#define REGISTER 265
+#define CONST 266
+#define VOLATILE 267
+#define VOID 268
+#define CHAR 269
+#define SHORT 270
+#define INT 271
+#define LONG 272
+#define FLOAT 273
+#define DOUBLE 274
+#define SIGNED 275
+#define UNSIGNED 276
+#define GOTO 277
+#define CONTINUE 278
+#define RETURN 279
+#define BREAK 280
+#define IDENTIFIER 281
+#define CONSTANT 282
+#define STRING_LITERAL 283
 
 
 

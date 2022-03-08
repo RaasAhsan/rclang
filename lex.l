@@ -19,14 +19,15 @@ WHITESPACE        [ \t\n]
 %}
 
 %%
-return                             { return RETURN; }
 register                           { return REGISTER; }
 typedef                            { return TYPEDEF; }
+
 auto                               { return AUTO; }
 static                             { return STATIC; }
 extern                             { return EXTERN; }
 volatile                           { return VOLATILE; }
 const                              { return CONST; }
+
 void                               { return VOID; } 
 char                               { return CHAR; } 
 short                              { return SHORT; } 
@@ -37,10 +38,15 @@ double                             { return DOUBLE; }
 signed                             { return SIGNED; } 
 unsigned                           { return UNSIGNED; }
 
+goto                               { return GOTO; }
+continue                           { return CONTINUE; }
+return                             { return RETURN; }
+break                              { return BREAK; }
+
 {IDENTIFIER}                       { return IDENTIFIER; }
 
-{DECIMAL_CONSTANT}                 { return INTEGER_CONSTANT; }
-{OCTAL_CONSTANT}                   { return INTEGER_CONSTANT; }
+{DECIMAL_CONSTANT}                 { return CONSTANT; }
+{OCTAL_CONSTANT}                   { return CONSTANT; }
 
 {STRING_LITERAL}                   { return STRING_LITERAL; }
 

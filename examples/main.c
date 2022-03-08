@@ -1,5 +1,4 @@
 
 int main() {
-    int* ptr;
-    return 0;
+    int a = 10;
 }

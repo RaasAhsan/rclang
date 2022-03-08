@@ -6,20 +6,24 @@ int yylex(void);
 void yyerror(const char *str) {
     fprintf(stderr, "error: %s\n", str);
 }
+
+int yywrap() {
+    return 1;
+}
+
 %}
 
 %token STRUCT
-%token BREAK
-%token ELSE
-%token RETURN
-%token IF
+%token IF ELSE
 %token AUTO TYPEDEF EXTERN STATIC REGISTER
 %token CONST VOLATILE
 
 %token VOID CHAR SHORT INT LONG FLOAT DOUBLE SIGNED UNSIGNED
 
+%token GOTO CONTINUE RETURN BREAK
+
 %token IDENTIFIER
-%token INTEGER_CONSTANT
+%token CONSTANT
 %token STRING_LITERAL
 
 %start translation_unit
@@ -84,6 +88,11 @@ type_qualifier
     | VOLATILE
     ;
 
+type_qualifier_list
+    : type_qualifier
+    | type_qualifier_list type_qualifier
+    ;
+
 type_specifier
     : VOID
     | CHAR
@@ -97,7 +106,36 @@ type_specifier
     ;
 
 declarator
+    : pointer direct_declarator
+    | direct_declarator
+    ;
+
+pointer
+    : '*' 
+    | '*' type_qualifier_list  
+    | '*' pointer
+    | '*' type_qualifier_list pointer
+    ;
+
+direct_declarator
     : IDENTIFIER
+    | '(' declarator ')'
+    | direct_declarator '(' parameter_type_list ')'
+    | direct_declarator '(' ')'
+    ;
+
+parameter_type_list
+    : parameter_list
+    ;
+
+parameter_list
+    : parameter_declaration
+    | parameter_list ',' parameter_declaration
+    ;
+
+parameter_declaration
+    : declaration_specifiers declarator
+    | declaration_specifiers
     ;
 
 declaration_list
@@ -109,6 +147,7 @@ declaration_list
 
 statement
     : compound_statement
+    | jump_statement
     ;
 
 statement_list
@@ -121,6 +160,14 @@ compound_statement
     | '{' declaration_list '}'
     | '{' statement_list '}'
     | '{' '}'
+    ;
+
+jump_statement
+    : GOTO IDENTIFIER ';'
+    | CONTINUE ';'
+    | BREAK ';'
+    | RETURN expression ';'
+    | RETURN ';'
     ;
 
 /* Expressions */
@@ -137,6 +184,7 @@ assignment_expression
 primary_expression
     : IDENTIFIER
     | STRING_LITERAL
+    | CONSTANT
     | '(' expression ')'
     ;
 

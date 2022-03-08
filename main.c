@@ -4,10 +4,6 @@
 extern FILE* yyin;
 extern int yyparse();
 
-int yywrap() {
-    return 1;
-}
-
 int main() {
     FILE *f = fopen("examples/main.c", "r");
     if (f == NULL) {
