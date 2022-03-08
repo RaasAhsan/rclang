@@ -677,14 +677,14 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    48,    48,    50,    54,    57,    61,    62,    68,    69,
-      73,    74,    78,    82,    83,    84,    85,    89,    90,    91,
-      92,    93,    94,    98,    99,   100,   101,   102,   106,   107,
-     111,   112,   116,   117,   118,   119,   120,   121,   122,   123,
-     124,   128,   129,   133,   134,   135,   136,   140,   141,   142,
-     143,   147,   154,   158,   159,   163,   164,   168,   169,   175,
-     176,   180,   181,   185,   186,   187,   188,   192,   193,   194,
-     195,   196,   202,   203,   207,   211,   212,   213,   214
+       0,    48,    48,    50,    54,    58,    62,    63,    69,    70,
+      74,    75,    79,    83,    84,    85,    86,    90,    91,    92,
+      93,    94,    95,    99,   100,   101,   102,   103,   107,   108,
+     112,   113,   117,   118,   119,   120,   121,   122,   123,   124,
+     125,   129,   130,   134,   135,   136,   137,   141,   142,   143,
+     144,   148,   155,   159,   160,   164,   165,   169,   170,   176,
+     177,   181,   182,   186,   187,   188,   189,   193,   194,   195,
+     196,   197,   203,   204,   208,   212,   213,   214,   215
 };
 #endif
 
@@ -1373,29 +1373,30 @@ yyreduce:
 #line 54 "rclang.y"
                           {
         printf("Processed function definition.\n");
+        printf("Stuff\n");
     }
-#line 1378 "y.tab.c"
+#line 1379 "y.tab.c"
     break;
 
   case 7: /* declaration: declaration_specifiers init_declarator_list ';'  */
-#line 62 "rclang.y"
+#line 63 "rclang.y"
                                                       {
         
     }
-#line 1386 "y.tab.c"
+#line 1387 "y.tab.c"
     break;
 
   case 51: /* identifier: IDENTIFIER  */
-#line 147 "rclang.y"
+#line 148 "rclang.y"
                  {
         printf("%s\n", yytext);
         (yyval.ident) = new_identifier(yytext);
     }
-#line 1395 "y.tab.c"
+#line 1396 "y.tab.c"
     break;
 
 
-#line 1399 "y.tab.c"
+#line 1400 "y.tab.c"
 
       default: break;
     }
@@ -1588,5 +1589,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 217 "rclang.y"
+#line 218 "rclang.y"
 

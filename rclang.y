@@ -53,6 +53,7 @@ translation_unit
 external_declaration
     : function_definition {
         printf("Processed function definition.\n");
+        printf("Stuff\n");
     }
     | declaration
     ;

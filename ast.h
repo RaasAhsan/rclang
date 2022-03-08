@@ -28,8 +28,6 @@ typedef struct identifier {
     char *name;
 } identifier;
 
-identifier new_identifier(char *name);
-
 typedef struct expression_list expression_list;
 typedef struct expression expression;
 
@@ -75,5 +73,7 @@ typedef struct expression {
         projection_expr(indirect_projection_expr);
     } op;
 } expression;
+
+identifier new_identifier(char *name);
 
 #endif
