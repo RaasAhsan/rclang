@@ -12,6 +12,11 @@
     expression *right; \
 } name
 
+#define projection_expr(name) struct { \
+    expression *base; \
+    identifier *member; \
+} name
+
 typedef struct module {
 
 } module;
@@ -61,14 +66,8 @@ typedef struct expression {
             expression *func;
             expression_list args;
         } call_expr;
-        struct {
-            expression *base;
-            identifier *field;
-        } projection_expr;
-        struct {
-            expression *base;
-            identifier *field;
-        } pointer_projection_expr;
+        projection_expr(direct_projection_expr);
+        projection_expr(indirect_projection_expr);
     } op;
 } expression;
 
