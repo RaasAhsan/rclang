@@ -3,6 +3,9 @@
 // 1. https://lambda.uta.edu/cse5317/notes/node26.html
 // 2. https://www.reddit.com/r/C_Programming/comments/lzq2t2/how_to_make_an_ast_in_c/
 
+#ifndef AST_H
+#define AST_H
+
 #define unary_expr(name) struct { \
     expression *value; \
 } name
@@ -14,7 +17,7 @@
 
 #define projection_expr(name) struct { \
     expression *base; \
-    identifier *member; \
+    identifier member; \
 } name
 
 typedef struct module {
@@ -24,6 +27,8 @@ typedef struct module {
 typedef struct identifier {
     char *name;
 } identifier;
+
+identifier new_identifier(char *name);
 
 typedef struct expression_list expression_list;
 typedef struct expression expression;
@@ -71,6 +76,4 @@ typedef struct expression {
     } op;
 } expression;
 
-void foo(expression *e) {
-    e->op.add_expr;
-}
+#endif

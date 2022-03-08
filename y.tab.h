@@ -1,14 +1,14 @@
-/* A Bison parser, made by GNU Bison 2.3.  */
+/* A Bison parser, made by GNU Bison 3.8.2.  */
 
-/* Skeleton interface for Bison's Yacc-like parsers in C
+/* Bison interface for Yacc-like parsers in C
 
-   Copyright (C) 1984, 1989, 1990, 2000, 2001, 2002, 2003, 2004, 2005, 2006
-   Free Software Foundation, Inc.
+   Copyright (C) 1984, 1989-1990, 2000-2015, 2018-2021 Free Software Foundation,
+   Inc.
 
-   This program is free software; you can redistribute it and/or modify
+   This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2, or (at your option)
-   any later version.
+   the Free Software Foundation, either version 3 of the License, or
+   (at your option) any later version.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -16,9 +16,7 @@
    GNU General Public License for more details.
 
    You should have received a copy of the GNU General Public License
-   along with this program; if not, write to the Free Software
-   Foundation, Inc., 51 Franklin Street, Fifth Floor,
-   Boston, MA 02110-1301, USA.  */
+   along with this program.  If not, see <https://www.gnu.org/licenses/>.  */
 
 /* As a special exception, you may create a larger work that contains
    part or all of the Bison parser skeleton and distribute that work
@@ -33,41 +31,69 @@
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
-/* Tokens.  */
+/* DO NOT RELY ON FEATURES THAT ARE NOT DOCUMENTED in the manual,
+   especially those whose name start with YY_ or yy_.  They are
+   private implementation details that can be changed or removed.  */
+
+#ifndef YY_YY_Y_TAB_H_INCLUDED
+# define YY_YY_Y_TAB_H_INCLUDED
+/* Debug traces.  */
+#ifndef YYDEBUG
+# define YYDEBUG 0
+#endif
+#if YYDEBUG
+extern int yydebug;
+#endif
+/* "%code requires" blocks.  */
+#line 17 "rclang.y"
+
+#include "ast.h"
+
+#line 53 "y.tab.h"
+
+/* Token kinds.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     STRUCT = 258,
-     IF = 259,
-     ELSE = 260,
-     AUTO = 261,
-     TYPEDEF = 262,
-     EXTERN = 263,
-     STATIC = 264,
-     REGISTER = 265,
-     CONST = 266,
-     VOLATILE = 267,
-     VOID = 268,
-     CHAR = 269,
-     SHORT = 270,
-     INT = 271,
-     LONG = 272,
-     FLOAT = 273,
-     DOUBLE = 274,
-     SIGNED = 275,
-     UNSIGNED = 276,
-     GOTO = 277,
-     CONTINUE = 278,
-     RETURN = 279,
-     BREAK = 280,
-     IDENTIFIER = 281,
-     CONSTANT = 282,
-     STRING_LITERAL = 283
-   };
+  enum yytokentype
+  {
+    YYEMPTY = -2,
+    YYEOF = 0,                     /* "end of file"  */
+    YYerror = 256,                 /* error  */
+    YYUNDEF = 257,                 /* "invalid token"  */
+    STRUCT = 258,                  /* STRUCT  */
+    IF = 259,                      /* IF  */
+    ELSE = 260,                    /* ELSE  */
+    AUTO = 261,                    /* AUTO  */
+    TYPEDEF = 262,                 /* TYPEDEF  */
+    EXTERN = 263,                  /* EXTERN  */
+    STATIC = 264,                  /* STATIC  */
+    REGISTER = 265,                /* REGISTER  */
+    CONST = 266,                   /* CONST  */
+    VOLATILE = 267,                /* VOLATILE  */
+    VOID = 268,                    /* VOID  */
+    CHAR = 269,                    /* CHAR  */
+    SHORT = 270,                   /* SHORT  */
+    INT = 271,                     /* INT  */
+    LONG = 272,                    /* LONG  */
+    FLOAT = 273,                   /* FLOAT  */
+    DOUBLE = 274,                  /* DOUBLE  */
+    SIGNED = 275,                  /* SIGNED  */
+    UNSIGNED = 276,                /* UNSIGNED  */
+    GOTO = 277,                    /* GOTO  */
+    CONTINUE = 278,                /* CONTINUE  */
+    RETURN = 279,                  /* RETURN  */
+    BREAK = 280,                   /* BREAK  */
+    IDENTIFIER = 281,              /* IDENTIFIER  */
+    CONSTANT = 282,                /* CONSTANT  */
+    STRING_LITERAL = 283           /* STRING_LITERAL  */
+  };
+  typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Tokens.  */
+/* Token kinds.  */
+#define YYEMPTY -2
+#define YYEOF 0
+#define YYerror 256
+#define YYUNDEF 257
 #define STRUCT 258
 #define IF 259
 #define ELSE 260
@@ -95,23 +121,29 @@
 #define CONSTANT 282
 #define STRING_LITERAL 283
 
-
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
-#line 33 "rclang.y"
+union YYSTYPE
 {
+#line 36 "rclang.y"
+
     char *n;
     int d;
-}
-/* Line 1529 of yacc.c.  */
-#line 110 "y.tab.h"
-	YYSTYPE;
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
-# define YYSTYPE_IS_DECLARED 1
+    identifier ident;
+
+#line 135 "y.tab.h"
+
+};
+typedef union YYSTYPE YYSTYPE;
 # define YYSTYPE_IS_TRIVIAL 1
+# define YYSTYPE_IS_DECLARED 1
 #endif
+
 
 extern YYSTYPE yylval;
 
+
+int yyparse (void);
+
+
+#endif /* !YY_YY_Y_TAB_H_INCLUDED  */

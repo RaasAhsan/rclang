@@ -1,6 +1,5 @@
 %{
 #include <stdio.h>
-#include "ast.h"
 
 extern char *yytext;
 int yylex(void);
@@ -14,6 +13,10 @@ int yywrap() {
 }
 
 %}
+
+%code requires {
+#include "ast.h"
+}
 
 %token STRUCT
 %token IF ELSE
@@ -33,9 +36,11 @@ int yywrap() {
 %union {
     char *n;
     int d;
+    identifier ident;
 }
 
 %type <n> translation_unit external_declaration
+%type <ident> identifier
 
 %%
 
@@ -132,10 +137,17 @@ pointer
     ;
 
 direct_declarator
-    : IDENTIFIER
+    : identifier
     | '(' declarator ')'
     | direct_declarator '(' parameter_type_list ')'
     | direct_declarator '(' ')'
+    ;
+
+identifier
+    : IDENTIFIER {
+        printf("%s\n", yytext);
+        $$ = new_identifier(yytext);
+    }
     ;
 
 parameter_type_list
@@ -177,7 +189,7 @@ compound_statement
     ;
 
 jump_statement
-    : GOTO IDENTIFIER ';'
+    : GOTO identifier ';'
     | CONTINUE ';'
     | BREAK ';'
     | RETURN expression ';'
@@ -196,7 +208,7 @@ assignment_expression
     ;
 
 primary_expression
-    : IDENTIFIER
+    : identifier
     | STRING_LITERAL
     | CONSTANT
     | '(' expression ')'
