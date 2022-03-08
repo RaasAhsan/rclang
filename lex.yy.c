@@ -515,9 +515,9 @@ int yy_flex_debug = 0;
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
-#line 1 "lex.l"
+#line 1 "rclang.l"
 /* Newline and backslash are not allowed either */
-#line 17 "lex.l"
+#line 17 "rclang.l"
 #include <stdio.h>
 #include "y.tab.h"
 #line 523 "lex.yy.c"
@@ -738,7 +738,7 @@ YY_DECL
 		}
 
 	{
-#line 21 "lex.l"
+#line 21 "rclang.l"
 
 #line 743 "lex.yy.c"
 
@@ -799,174 +799,174 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 22 "lex.l"
+#line 22 "rclang.l"
 { return REGISTER; }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 23 "lex.l"
+#line 23 "rclang.l"
 { return TYPEDEF; }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 25 "lex.l"
+#line 25 "rclang.l"
 { return AUTO; }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 26 "lex.l"
+#line 26 "rclang.l"
 { return STATIC; }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 27 "lex.l"
+#line 27 "rclang.l"
 { return EXTERN; }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 28 "lex.l"
+#line 28 "rclang.l"
 { return VOLATILE; }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 29 "lex.l"
+#line 29 "rclang.l"
 { return CONST; }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 31 "lex.l"
+#line 31 "rclang.l"
 { return VOID; } 
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 32 "lex.l"
+#line 32 "rclang.l"
 { return CHAR; } 
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 33 "lex.l"
+#line 33 "rclang.l"
 { return SHORT; } 
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 34 "lex.l"
+#line 34 "rclang.l"
 { return INT; } 
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 35 "lex.l"
+#line 35 "rclang.l"
 { return LONG; } 
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 36 "lex.l"
+#line 36 "rclang.l"
 { return FLOAT; }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 37 "lex.l"
+#line 37 "rclang.l"
 { return DOUBLE; } 
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 38 "lex.l"
+#line 38 "rclang.l"
 { return SIGNED; } 
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 39 "lex.l"
+#line 39 "rclang.l"
 { return UNSIGNED; }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 41 "lex.l"
+#line 41 "rclang.l"
 { return GOTO; }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 42 "lex.l"
+#line 42 "rclang.l"
 { return CONTINUE; }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 43 "lex.l"
+#line 43 "rclang.l"
 { return RETURN; }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 44 "lex.l"
+#line 44 "rclang.l"
 { return BREAK; }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 46 "lex.l"
+#line 46 "rclang.l"
 { return IDENTIFIER; }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 48 "lex.l"
+#line 48 "rclang.l"
 { return CONSTANT; }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 49 "lex.l"
+#line 49 "rclang.l"
 { return CONSTANT; }
 	YY_BREAK
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 51 "lex.l"
+#line 51 "rclang.l"
 { return STRING_LITERAL; }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 53 "lex.l"
+#line 53 "rclang.l"
 { return '('; }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 54 "lex.l"
+#line 54 "rclang.l"
 { return ')'; }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 55 "lex.l"
+#line 55 "rclang.l"
 { return '{'; }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 56 "lex.l"
+#line 56 "rclang.l"
 { return '}'; }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 57 "lex.l"
+#line 57 "rclang.l"
 { return ';'; }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 58 "lex.l"
+#line 58 "rclang.l"
 { return '*'; }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 59 "lex.l"
+#line 59 "rclang.l"
 { return ','; }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 60 "lex.l"
+#line 60 "rclang.l"
 { return '='; }
 	YY_BREAK
 case 33:
 /* rule 33 can match eol */
 YY_RULE_SETUP
-#line 63 "lex.l"
+#line 63 "rclang.l"
 {}
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 65 "lex.l"
+#line 65 "rclang.l"
 ECHO;
 	YY_BREAK
 #line 972 "lex.yy.c"
@@ -1974,6 +1974,6 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 65 "lex.l"
+#line 65 "rclang.l"
 
 

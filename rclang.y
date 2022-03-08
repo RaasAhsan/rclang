@@ -1,6 +1,8 @@
 %{
 #include <stdio.h>
+#include "ast.h"
 
+extern char *yytext;
 int yylex(void);
 
 void yyerror(const char *str) {
@@ -28,21 +30,33 @@ int yywrap() {
 
 %start translation_unit
 
+%union {
+    char *n;
+    int d;
+}
+
+%type <n> translation_unit external_declaration
+
 %%
 
 translation_unit
-    : external_declaration
+    : external_declaration {
+    }
     | translation_unit external_declaration
     ;
 
 external_declaration
-    : function_definition
+    : function_definition {
+        printf("Processed function definition.\n");
+    }
     | declaration
     ;
 
 declaration
     : declaration_specifiers ';'
-    | declaration_specifiers init_declarator_list ';'
+    | declaration_specifiers init_declarator_list ';' {
+        
+    }
     ;
 
 init_declarator_list

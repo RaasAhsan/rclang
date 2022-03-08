@@ -126,10 +126,12 @@
 
 
 /* Copy the first part of user declarations.  */
-#line 1 "c.y"
+#line 1 "rclang.y"
 
 #include <stdio.h>
+#include "ast.h"
 
+extern char *yytext;
 int yylex(void);
 
 void yyerror(const char *str) {
@@ -161,7 +163,15 @@ int yywrap() {
 #endif
 
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef int YYSTYPE;
+typedef union YYSTYPE
+#line 33 "rclang.y"
+{
+    char *n;
+    int d;
+}
+/* Line 193 of yacc.c.  */
+#line 174 "y.tab.c"
+	YYSTYPE;
 # define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 # define YYSTYPE_IS_TRIVIAL 1
@@ -173,7 +183,7 @@ typedef int YYSTYPE;
 
 
 /* Line 216 of yacc.c.  */
-#line 177 "y.tab.c"
+#line 187 "y.tab.c"
 
 #ifdef short
 # undef short
@@ -485,14 +495,14 @@ static const yytype_int8 yyrhs[] =
 /* YYRLINE[YYN] -- source line where rule number YYN was defined.  */
 static const yytype_uint8 yyrline[] =
 {
-       0,    34,    34,    35,    39,    40,    44,    45,    49,    50,
-      54,    55,    59,    63,    64,    65,    66,    70,    71,    72,
-      73,    74,    75,    79,    80,    81,    82,    83,    87,    88,
-      92,    93,    97,    98,    99,   100,   101,   102,   103,   104,
-     105,   109,   110,   114,   115,   116,   117,   121,   122,   123,
-     124,   128,   132,   133,   137,   138,   142,   143,   149,   150,
-     154,   155,   159,   160,   161,   162,   166,   167,   168,   169,
-     170,   176,   177,   181,   185,   186,   187,   188
+       0,    43,    43,    45,    49,    52,    56,    57,    63,    64,
+      68,    69,    73,    77,    78,    79,    80,    84,    85,    86,
+      87,    88,    89,    93,    94,    95,    96,    97,   101,   102,
+     106,   107,   111,   112,   113,   114,   115,   116,   117,   118,
+     119,   123,   124,   128,   129,   130,   131,   135,   136,   137,
+     138,   142,   146,   147,   151,   152,   156,   157,   163,   164,
+     168,   169,   173,   174,   175,   176,   180,   181,   182,   183,
+     184,   190,   191,   195,   199,   200,   201,   202
 };
 #endif
 
@@ -1511,9 +1521,29 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-      
+        case 2:
+#line 43 "rclang.y"
+    {
+    }
+    break;
+
+  case 4:
+#line 49 "rclang.y"
+    {
+        printf("Processed function definition.\n");
+    }
+    break;
+
+  case 7:
+#line 57 "rclang.y"
+    {
+        
+    }
+    break;
+
+
 /* Line 1267 of yacc.c.  */
-#line 1517 "y.tab.c"
+#line 1547 "y.tab.c"
       default: break;
     }
   YY_SYMBOL_PRINT ("-> $$ =", yyr1[yyn], &yyval, &yyloc);
@@ -1727,6 +1757,6 @@ yyreturn:
 }
 
 
-#line 191 "c.y"
+#line 205 "rclang.y"
 
 
