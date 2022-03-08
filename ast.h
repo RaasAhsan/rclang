@@ -6,6 +6,25 @@
 #ifndef AST_H
 #define AST_H
 
+typedef struct statement statement;
+typedef struct statement_list statement_list;
+
+typedef struct expression expression;
+typedef struct expression_list expression_list;
+
+typedef struct declaration declaration;
+typedef struct declaration_list declaration_list;
+
+typedef struct module {
+
+} module;
+
+typedef struct identifier {
+    char *name;
+} identifier;
+
+// Expressions
+
 #define unary_expr(name) struct { \
     expression *value; \
 } name
@@ -20,23 +39,12 @@
     identifier member; \
 } name
 
-typedef struct module {
-
-} module;
-
-typedef struct identifier {
-    char *name;
-} identifier;
-
-typedef struct expression_list expression_list;
-typedef struct expression expression;
-
-typedef struct expression_list {
+struct expression_list {
     expression *expr;
     expression_list *next;
-} expression_list;
+};
 
-typedef struct expression {
+struct expression {
     enum {
         integer_expr,
         string_expr,
@@ -74,14 +82,48 @@ typedef struct expression {
         projection_expr(indirect_projection_expr);
         binary_expr(double_expr);
     } op;
-} expression;
+};
+
+// Statements
+
+typedef struct {
+    declaration_list *declarations;
+    statement_list *statements;
+} compound_statement;
+
+typedef struct {
+    enum {
+        goto_stmt,
+        continue_stmt,
+        break_stmt,
+        return_stmt
+    } tag;
+    union {
+        identifier goto_stmt;
+        expression* return_stmt;
+    } op;
+} jump_statement;
+
+struct statement {
+    enum {
+        compound_stmt,
+        jump_stmt
+    } tag;
+    union {
+        jump_statement *jump_stmt;
+        compound_statement *compound_stmt;
+    } op;
+};
+
+struct statement_list {
+    statement *stmt;
+    statement_list *next;
+};
 
 identifier new_identifier(char *name);
 
 expression *new_identifier_expression(identifier ident);
-
 expression *new_string_literal_expression(char* name);
-
 expression *new_double_expression(expression *left, expression *right);
 
 #endif
