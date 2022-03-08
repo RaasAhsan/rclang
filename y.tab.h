@@ -127,11 +127,10 @@ union YYSTYPE
 {
 #line 36 "rclang.y"
 
-    char *n;
-    int d;
     identifier ident;
+    expression *expr;
 
-#line 135 "y.tab.h"
+#line 134 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

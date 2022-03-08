@@ -47,12 +47,13 @@ typedef struct expression {
         divide_expr,
         modulo_expr,
         dereference_expr,
-        reference_expr
+        reference_expr,
+        double_expr
     } tag;
     union {
         int integer_expr;
         char *string_expr;
-        identifier *identifier_expr;
+        identifier identifier_expr;
         binary_expr(add_expr);
         binary_expr(subtract_expr);
         binary_expr(multiply_expr);
@@ -71,9 +72,16 @@ typedef struct expression {
         } call_expr;
         projection_expr(direct_projection_expr);
         projection_expr(indirect_projection_expr);
+        binary_expr(double_expr);
     } op;
 } expression;
 
 identifier new_identifier(char *name);
+
+expression *new_identifier_expression(identifier ident);
+
+expression *new_string_literal_expression(char* name);
+
+expression *new_double_expression(expression *left, expression *right);
 
 #endif

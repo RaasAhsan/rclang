@@ -200,11 +200,10 @@ union YYSTYPE
 {
 #line 36 "rclang.y"
 
-    char *n;
-    int d;
     identifier ident;
+    expression *expr;
 
-#line 208 "y.tab.c"
+#line 207 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -684,7 +683,7 @@ static const yytype_uint8 yyrline[] =
      125,   129,   130,   134,   135,   136,   137,   141,   142,   143,
      144,   148,   155,   159,   160,   164,   165,   169,   170,   176,
      177,   181,   182,   186,   187,   188,   189,   193,   194,   195,
-     196,   197,   203,   204,   208,   212,   213,   214,   215
+     196,   197,   203,   204,   210,   214,   217,   220,   221
 };
 #endif
 
@@ -1366,7 +1365,7 @@ yyreduce:
 #line 48 "rclang.y"
                            {
     }
-#line 1370 "y.tab.c"
+#line 1369 "y.tab.c"
     break;
 
   case 4: /* external_declaration: function_definition  */
@@ -1375,7 +1374,7 @@ yyreduce:
         printf("Processed function definition.\n");
         printf("Stuff\n");
     }
-#line 1379 "y.tab.c"
+#line 1378 "y.tab.c"
     break;
 
   case 7: /* declaration: declaration_specifiers init_declarator_list ';'  */
@@ -1383,7 +1382,7 @@ yyreduce:
                                                       {
         
     }
-#line 1387 "y.tab.c"
+#line 1386 "y.tab.c"
     break;
 
   case 51: /* identifier: IDENTIFIER  */
@@ -1392,11 +1391,43 @@ yyreduce:
         printf("%s\n", yytext);
         (yyval.ident) = new_identifier(yytext);
     }
-#line 1396 "y.tab.c"
+#line 1395 "y.tab.c"
+    break;
+
+  case 73: /* expression: expression ',' assignment_expression  */
+#line 204 "rclang.y"
+                                           {
+        (yyval.expr) = new_double_expression((yyvsp[-2].expr), (yyvsp[0].expr));
+    }
+#line 1403 "y.tab.c"
+    break;
+
+  case 75: /* primary_expression: identifier  */
+#line 214 "rclang.y"
+                 {
+        (yyval.expr) = new_identifier_expression((yyvsp[0].ident));
+    }
+#line 1411 "y.tab.c"
+    break;
+
+  case 76: /* primary_expression: STRING_LITERAL  */
+#line 217 "rclang.y"
+                     {
+        (yyval.expr) = new_string_literal_expression(yytext);
+    }
+#line 1419 "y.tab.c"
+    break;
+
+  case 78: /* primary_expression: '(' expression ')'  */
+#line 221 "rclang.y"
+                         {
+        (yyval.expr) = (yyvsp[-1].expr);
+    }
+#line 1427 "y.tab.c"
     break;
 
 
-#line 1400 "y.tab.c"
+#line 1431 "y.tab.c"
 
       default: break;
     }
@@ -1589,5 +1620,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 218 "rclang.y"
+#line 226 "rclang.y"
 

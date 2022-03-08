@@ -34,13 +34,13 @@ int yywrap() {
 %start translation_unit
 
 %union {
-    char *n;
-    int d;
     identifier ident;
+    expression *expr;
 }
 
-%type <n> translation_unit external_declaration
+/* %type <n> translation_unit external_declaration */
 %type <ident> identifier
+%type <expr> expression assignment_expression primary_expression
 
 %%
 
@@ -201,7 +201,9 @@ jump_statement
 
 expression
     : assignment_expression
-    | expression ',' assignment_expression
+    | expression ',' assignment_expression {
+        $$ = new_double_expression($1, $3);
+    }
     ;
 
 assignment_expression
@@ -209,10 +211,16 @@ assignment_expression
     ;
 
 primary_expression
-    : identifier
-    | STRING_LITERAL
+    : identifier {
+        $$ = new_identifier_expression($1);
+    }
+    | STRING_LITERAL {
+        $$ = new_string_literal_expression(yytext);
+    }
     | CONSTANT
-    | '(' expression ')'
+    | '(' expression ')' {
+        $$ = $2;
+    }
     ;
 
 %%
