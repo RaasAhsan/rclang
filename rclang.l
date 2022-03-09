@@ -16,6 +16,7 @@ WHITESPACE        [ \t\n]
 %{
 #include <stdio.h>
 #include "y.tab.h"
+
 %}
 
 %%

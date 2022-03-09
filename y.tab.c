@@ -69,6 +69,7 @@
 /* First part of user prologue.  */
 #line 1 "rclang.y"
 
+// #define YYDEBUG 1
 #include <stdio.h>
 
 extern char *yytext;
@@ -83,7 +84,7 @@ int yywrap() {
 }
 
 
-#line 87 "y.tab.c"
+#line 88 "y.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -118,11 +119,11 @@ int yywrap() {
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 17 "rclang.y"
+#line 18 "rclang.y"
 
 #include "ast.h"
 
-#line 126 "y.tab.c"
+#line 127 "y.tab.c"
 
 /* Token kinds.  */
 #ifndef YYTOKENTYPE
@@ -198,9 +199,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 36 "rclang.y"
+#line 39 "rclang.y"
 
-    translation_unit translation_unit;
+    translation_unit *translation_unit;
+    external_declaration external_declaration;
+    function_definition function_definition;
 
     identifier ident;
     expression *expr;
@@ -209,7 +212,8 @@ union YYSTYPE
     type_specifier ts;
     storage_class_specifier scs;
 
-    declaration declaration;
+    declaration *declaration;
+    declaration_list *declaration_list;
     declaration_specifiers *decl_specifiers;
     pointer *pointer;
     declarator *declarator;
@@ -223,7 +227,12 @@ union YYSTYPE
     parameter_list *parameter_list;
     parameter_declaration parameter_declaration;
 
-#line 227 "y.tab.c"
+    statement_list *statement_list;
+    statement *statement;
+    compound_statement *compound_statement;
+    jump_statement *jump_statement;
+
+#line 236 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -505,7 +514,7 @@ typedef int yy_state_fast_t;
 
 #define YY_ASSERT(E) ((void) (0 && (E)))
 
-#if !defined yyoverflow
+#if 1
 
 /* The parser invokes alloca or malloc; define the necessary symbols.  */
 
@@ -570,7 +579,7 @@ void free (void *); /* INFRINGES ON USER NAME SPACE */
 #   endif
 #  endif
 # endif
-#endif /* !defined yyoverflow */
+#endif /* 1 */
 
 #if (! defined yyoverflow \
      && (! defined __cplusplus \
@@ -696,21 +705,21 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    86,    86,    87,    91,    95,    99,   102,   109,   112,
-     118,   122,   129,   135,   136,   137,   138,   142,   146,   150,
-     154,   158,   162,   169,   172,   175,   178,   181,   187,   190,
-     196,   197,   201,   204,   207,   210,   213,   216,   219,   222,
-     225,   231,   235,   242,   245,   248,   251,   257,   261,   265,
-     270,   278,   285,   291,   294,   300,   304,   311,   312,   318,
-     319,   323,   324,   328,   329,   330,   331,   335,   336,   337,
-     338,   339,   345,   346,   352,   356,   359,   362,   363
+       0,   106,   106,   109,   115,   119,   126,   130,   138,   141,
+     147,   151,   158,   166,   167,   172,   173,   177,   181,   185,
+     189,   194,   198,   205,   208,   211,   214,   217,   223,   226,
+     232,   233,   237,   240,   243,   246,   249,   252,   255,   258,
+     261,   267,   271,   278,   281,   284,   287,   293,   298,   303,
+     309,   318,   325,   331,   334,   340,   344,   351,   354,   362,
+     367,   375,   378,   384,   389,   394,   399,   407,   412,   416,
+     420,   425,   435,   436,   442,   446,   449,   452,   458
 };
 #endif
 
 /** Accessing symbol of state STATE.  */
 #define YY_ACCESSING_SYMBOL(State) YY_CAST (yysymbol_kind_t, yystos[State])
 
-#if YYDEBUG || 0
+#if 1
 /* The user-facing name of the symbol whose (internal) number is
    YYSYMBOL.  No bounds checking.  */
 static const char *yysymbol_name (yysymbol_kind_t yysymbol) YY_ATTRIBUTE_UNUSED;
@@ -1101,8 +1110,275 @@ int yydebug;
 #endif
 
 
+/* Context of a parse error.  */
+typedef struct
+{
+  yy_state_t *yyssp;
+  yysymbol_kind_t yytoken;
+} yypcontext_t;
+
+/* Put in YYARG at most YYARGN of the expected tokens given the
+   current YYCTX, and return the number of tokens stored in YYARG.  If
+   YYARG is null, return the number of expected tokens (guaranteed to
+   be less than YYNTOKENS).  Return YYENOMEM on memory exhaustion.
+   Return 0 if there are more than YYARGN expected tokens, yet fill
+   YYARG up to YYARGN. */
+static int
+yypcontext_expected_tokens (const yypcontext_t *yyctx,
+                            yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  int yyn = yypact[+*yyctx->yyssp];
+  if (!yypact_value_is_default (yyn))
+    {
+      /* Start YYX at -YYN if negative to avoid negative indexes in
+         YYCHECK.  In other words, skip the first -YYN actions for
+         this state because they are default actions.  */
+      int yyxbegin = yyn < 0 ? -yyn : 0;
+      /* Stay within bounds of both yycheck and yytname.  */
+      int yychecklim = YYLAST - yyn + 1;
+      int yyxend = yychecklim < YYNTOKENS ? yychecklim : YYNTOKENS;
+      int yyx;
+      for (yyx = yyxbegin; yyx < yyxend; ++yyx)
+        if (yycheck[yyx + yyn] == yyx && yyx != YYSYMBOL_YYerror
+            && !yytable_value_is_error (yytable[yyx + yyn]))
+          {
+            if (!yyarg)
+              ++yycount;
+            else if (yycount == yyargn)
+              return 0;
+            else
+              yyarg[yycount++] = YY_CAST (yysymbol_kind_t, yyx);
+          }
+    }
+  if (yyarg && yycount == 0 && 0 < yyargn)
+    yyarg[0] = YYSYMBOL_YYEMPTY;
+  return yycount;
+}
 
 
+
+
+#ifndef yystrlen
+# if defined __GLIBC__ && defined _STRING_H
+#  define yystrlen(S) (YY_CAST (YYPTRDIFF_T, strlen (S)))
+# else
+/* Return the length of YYSTR.  */
+static YYPTRDIFF_T
+yystrlen (const char *yystr)
+{
+  YYPTRDIFF_T yylen;
+  for (yylen = 0; yystr[yylen]; yylen++)
+    continue;
+  return yylen;
+}
+# endif
+#endif
+
+#ifndef yystpcpy
+# if defined __GLIBC__ && defined _STRING_H && defined _GNU_SOURCE
+#  define yystpcpy stpcpy
+# else
+/* Copy YYSRC to YYDEST, returning the address of the terminating '\0' in
+   YYDEST.  */
+static char *
+yystpcpy (char *yydest, const char *yysrc)
+{
+  char *yyd = yydest;
+  const char *yys = yysrc;
+
+  while ((*yyd++ = *yys++) != '\0')
+    continue;
+
+  return yyd - 1;
+}
+# endif
+#endif
+
+#ifndef yytnamerr
+/* Copy to YYRES the contents of YYSTR after stripping away unnecessary
+   quotes and backslashes, so that it's suitable for yyerror.  The
+   heuristic is that double-quoting is unnecessary unless the string
+   contains an apostrophe, a comma, or backslash (other than
+   backslash-backslash).  YYSTR is taken from yytname.  If YYRES is
+   null, do not copy; instead, return the length of what the result
+   would have been.  */
+static YYPTRDIFF_T
+yytnamerr (char *yyres, const char *yystr)
+{
+  if (*yystr == '"')
+    {
+      YYPTRDIFF_T yyn = 0;
+      char const *yyp = yystr;
+      for (;;)
+        switch (*++yyp)
+          {
+          case '\'':
+          case ',':
+            goto do_not_strip_quotes;
+
+          case '\\':
+            if (*++yyp != '\\')
+              goto do_not_strip_quotes;
+            else
+              goto append;
+
+          append:
+          default:
+            if (yyres)
+              yyres[yyn] = *yyp;
+            yyn++;
+            break;
+
+          case '"':
+            if (yyres)
+              yyres[yyn] = '\0';
+            return yyn;
+          }
+    do_not_strip_quotes: ;
+    }
+
+  if (yyres)
+    return yystpcpy (yyres, yystr) - yyres;
+  else
+    return yystrlen (yystr);
+}
+#endif
+
+
+static int
+yy_syntax_error_arguments (const yypcontext_t *yyctx,
+                           yysymbol_kind_t yyarg[], int yyargn)
+{
+  /* Actual size of YYARG. */
+  int yycount = 0;
+  /* There are many possibilities here to consider:
+     - If this state is a consistent state with a default action, then
+       the only way this function was invoked is if the default action
+       is an error action.  In that case, don't check for expected
+       tokens because there are none.
+     - The only way there can be no lookahead present (in yychar) is if
+       this state is a consistent state with a default action.  Thus,
+       detecting the absence of a lookahead is sufficient to determine
+       that there is no unexpected or expected token to report.  In that
+       case, just report a simple "syntax error".
+     - Don't assume there isn't a lookahead just because this state is a
+       consistent state with a default action.  There might have been a
+       previous inconsistent state, consistent state with a non-default
+       action, or user semantic action that manipulated yychar.
+     - Of course, the expected token list depends on states to have
+       correct lookahead information, and it depends on the parser not
+       to perform extra reductions after fetching a lookahead from the
+       scanner and before detecting a syntax error.  Thus, state merging
+       (from LALR or IELR) and default reductions corrupt the expected
+       token list.  However, the list is correct for canonical LR with
+       one exception: it will still contain any token that will not be
+       accepted due to an error action in a later state.
+  */
+  if (yyctx->yytoken != YYSYMBOL_YYEMPTY)
+    {
+      int yyn;
+      if (yyarg)
+        yyarg[yycount] = yyctx->yytoken;
+      ++yycount;
+      yyn = yypcontext_expected_tokens (yyctx,
+                                        yyarg ? yyarg + 1 : yyarg, yyargn - 1);
+      if (yyn == YYENOMEM)
+        return YYENOMEM;
+      else
+        yycount += yyn;
+    }
+  return yycount;
+}
+
+/* Copy into *YYMSG, which is of size *YYMSG_ALLOC, an error message
+   about the unexpected token YYTOKEN for the state stack whose top is
+   YYSSP.
+
+   Return 0 if *YYMSG was successfully written.  Return -1 if *YYMSG is
+   not large enough to hold the message.  In that case, also set
+   *YYMSG_ALLOC to the required number of bytes.  Return YYENOMEM if the
+   required number of bytes is too large to store.  */
+static int
+yysyntax_error (YYPTRDIFF_T *yymsg_alloc, char **yymsg,
+                const yypcontext_t *yyctx)
+{
+  enum { YYARGS_MAX = 5 };
+  /* Internationalized format string. */
+  const char *yyformat = YY_NULLPTR;
+  /* Arguments of yyformat: reported tokens (one for the "unexpected",
+     one per "expected"). */
+  yysymbol_kind_t yyarg[YYARGS_MAX];
+  /* Cumulated lengths of YYARG.  */
+  YYPTRDIFF_T yysize = 0;
+
+  /* Actual size of YYARG. */
+  int yycount = yy_syntax_error_arguments (yyctx, yyarg, YYARGS_MAX);
+  if (yycount == YYENOMEM)
+    return YYENOMEM;
+
+  switch (yycount)
+    {
+#define YYCASE_(N, S)                       \
+      case N:                               \
+        yyformat = S;                       \
+        break
+    default: /* Avoid compiler warnings. */
+      YYCASE_(0, YY_("syntax error"));
+      YYCASE_(1, YY_("syntax error, unexpected %s"));
+      YYCASE_(2, YY_("syntax error, unexpected %s, expecting %s"));
+      YYCASE_(3, YY_("syntax error, unexpected %s, expecting %s or %s"));
+      YYCASE_(4, YY_("syntax error, unexpected %s, expecting %s or %s or %s"));
+      YYCASE_(5, YY_("syntax error, unexpected %s, expecting %s or %s or %s or %s"));
+#undef YYCASE_
+    }
+
+  /* Compute error message size.  Don't count the "%s"s, but reserve
+     room for the terminator.  */
+  yysize = yystrlen (yyformat) - 2 * yycount + 1;
+  {
+    int yyi;
+    for (yyi = 0; yyi < yycount; ++yyi)
+      {
+        YYPTRDIFF_T yysize1
+          = yysize + yytnamerr (YY_NULLPTR, yytname[yyarg[yyi]]);
+        if (yysize <= yysize1 && yysize1 <= YYSTACK_ALLOC_MAXIMUM)
+          yysize = yysize1;
+        else
+          return YYENOMEM;
+      }
+  }
+
+  if (*yymsg_alloc < yysize)
+    {
+      *yymsg_alloc = 2 * yysize;
+      if (! (yysize <= *yymsg_alloc
+             && *yymsg_alloc <= YYSTACK_ALLOC_MAXIMUM))
+        *yymsg_alloc = YYSTACK_ALLOC_MAXIMUM;
+      return -1;
+    }
+
+  /* Avoid sprintf, as that infringes on the user's name space.
+     Don't have undefined behavior even if the translation
+     produced a string with the wrong number of "%s"s.  */
+  {
+    char *yyp = *yymsg;
+    int yyi = 0;
+    while ((*yyp = *yyformat) != '\0')
+      if (*yyp == '%' && yyformat[1] == 's' && yyi < yycount)
+        {
+          yyp += yytnamerr (yyp, yytname[yyarg[yyi++]]);
+          yyformat += 2;
+        }
+      else
+        {
+          ++yyp;
+          ++yyformat;
+        }
+  }
+  return 0;
+}
 
 
 /*-----------------------------------------------.
@@ -1171,7 +1447,10 @@ yyparse (void)
      action routines.  */
   YYSTYPE yyval;
 
-
+  /* Buffer for error messages, and its allocated size.  */
+  char yymsgbuf[128];
+  char *yymsg = yymsgbuf;
+  YYPTRDIFF_T yymsg_alloc = sizeof yymsgbuf;
 
 #define YYPOPSTACK(N)   (yyvsp -= (N), yyssp -= (N))
 
@@ -1381,429 +1660,624 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 4: /* external_declaration: function_definition  */
-#line 91 "rclang.y"
-                          {
-        printf("Processed function definition.\n");
-        printf("Stuff\n");
+  case 2: /* translation_unit: external_declaration  */
+#line 106 "rclang.y"
+                           {
+        (yyval.translation_unit) = new_translation_unit((yyvsp[0].external_declaration), NULL);
     }
-#line 1391 "y.tab.c"
+#line 1669 "y.tab.c"
+    break;
+
+  case 3: /* translation_unit: translation_unit external_declaration  */
+#line 109 "rclang.y"
+                                            {
+        (yyval.translation_unit) = new_translation_unit((yyvsp[0].external_declaration), (yyvsp[-1].translation_unit));
+    }
+#line 1677 "y.tab.c"
+    break;
+
+  case 4: /* external_declaration: function_definition  */
+#line 115 "rclang.y"
+                          {
+        (yyval.external_declaration).op = ED_FUNCTION_DEFINITION;
+        (yyval.external_declaration).decl.func = (yyvsp[0].function_definition);
+    }
+#line 1686 "y.tab.c"
+    break;
+
+  case 5: /* external_declaration: declaration  */
+#line 119 "rclang.y"
+                  {
+        (yyval.external_declaration).op = ED_DECLARATION;
+        (yyval.external_declaration).decl.decl = (yyvsp[0].declaration);
+    }
+#line 1695 "y.tab.c"
     break;
 
   case 6: /* declaration: declaration_specifiers ';'  */
-#line 99 "rclang.y"
+#line 126 "rclang.y"
                                  {
-        (yyval.declaration).specifiers = (yyvsp[-1].decl_specifiers);
+        (yyval.declaration) = malloc(sizeof(declaration));
+        (yyval.declaration)->specifiers = (yyvsp[-1].decl_specifiers);
     }
-#line 1399 "y.tab.c"
+#line 1704 "y.tab.c"
     break;
 
   case 7: /* declaration: declaration_specifiers init_declarator_list ';'  */
-#line 102 "rclang.y"
+#line 130 "rclang.y"
                                                       {
-        (yyval.declaration).specifiers = (yyvsp[-2].decl_specifiers);
-        (yyval.declaration).init_decls = (yyvsp[-1].init_declarator_list);
+        (yyval.declaration) = malloc(sizeof(declaration));
+        (yyval.declaration)->specifiers = (yyvsp[-2].decl_specifiers);
+        (yyval.declaration)->init_decls = (yyvsp[-1].init_declarator_list);
     }
-#line 1408 "y.tab.c"
+#line 1714 "y.tab.c"
     break;
 
   case 8: /* init_declarator_list: init_declarator  */
-#line 109 "rclang.y"
+#line 138 "rclang.y"
                       {
         (yyval.init_declarator_list) = new_init_declarator_list((yyvsp[0].init_declarator), NULL);
     }
-#line 1416 "y.tab.c"
+#line 1722 "y.tab.c"
     break;
 
   case 9: /* init_declarator_list: init_declarator_list ',' init_declarator  */
-#line 112 "rclang.y"
+#line 141 "rclang.y"
                                                {
         (yyval.init_declarator_list) = new_init_declarator_list((yyvsp[0].init_declarator), (yyvsp[-2].init_declarator_list));
     }
-#line 1424 "y.tab.c"
+#line 1730 "y.tab.c"
     break;
 
   case 10: /* init_declarator: declarator  */
-#line 118 "rclang.y"
+#line 147 "rclang.y"
                  {
         (yyval.init_declarator).decl = (yyvsp[0].declarator);
         (yyval.init_declarator).init = NULL;
     }
-#line 1433 "y.tab.c"
+#line 1739 "y.tab.c"
     break;
 
   case 11: /* init_declarator: declarator '=' initializer  */
-#line 122 "rclang.y"
+#line 151 "rclang.y"
                                  {
         (yyval.init_declarator).decl = (yyvsp[-2].declarator);
         (yyval.init_declarator).init = (yyvsp[0].initializer);
     }
-#line 1442 "y.tab.c"
+#line 1748 "y.tab.c"
     break;
 
   case 12: /* initializer: assignment_expression  */
-#line 129 "rclang.y"
+#line 158 "rclang.y"
                             {
+        printf("assignment\n");
+        (yyval.initializer) = malloc(sizeof(initializer));
         (yyval.initializer)->expr = (yyvsp[0].expr);
     }
-#line 1450 "y.tab.c"
+#line 1758 "y.tab.c"
+    break;
+
+  case 14: /* function_definition: declaration_specifiers declarator compound_statement  */
+#line 167 "rclang.y"
+                                                           {
+        (yyval.function_definition).specifiers = (yyvsp[-2].decl_specifiers);
+        (yyval.function_definition).declarator = (yyvsp[-1].declarator);
+        (yyval.function_definition).statement = (yyvsp[0].compound_statement);
+    }
+#line 1768 "y.tab.c"
     break;
 
   case 17: /* declaration_specifiers: storage_class_specifier declaration_specifiers  */
-#line 142 "rclang.y"
+#line 177 "rclang.y"
                                                      {
         declaration_specifier spec = {.tag = DS_STORAGE_CLASS_SPECIFIER, .specifier = {.sc = (yyvsp[-1].scs)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
     }
-#line 1459 "y.tab.c"
+#line 1777 "y.tab.c"
     break;
 
   case 18: /* declaration_specifiers: storage_class_specifier  */
-#line 146 "rclang.y"
+#line 181 "rclang.y"
                               {
         declaration_specifier spec = {.tag = DS_STORAGE_CLASS_SPECIFIER, .specifier = {.sc = (yyvsp[0].scs)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
     }
-#line 1468 "y.tab.c"
+#line 1786 "y.tab.c"
     break;
 
   case 19: /* declaration_specifiers: type_specifier declaration_specifiers  */
-#line 150 "rclang.y"
+#line 185 "rclang.y"
                                             {
         declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = (yyvsp[-1].ts)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
     }
-#line 1477 "y.tab.c"
+#line 1795 "y.tab.c"
     break;
 
   case 20: /* declaration_specifiers: type_specifier  */
-#line 154 "rclang.y"
+#line 189 "rclang.y"
                      {
+        printf("found type %d\n", (yyvsp[0].ts).tag);
         declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = (yyvsp[0].ts)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
     }
-#line 1486 "y.tab.c"
+#line 1805 "y.tab.c"
     break;
 
   case 21: /* declaration_specifiers: type_qualifier declaration_specifiers  */
-#line 158 "rclang.y"
+#line 194 "rclang.y"
                                             {
         declaration_specifier spec = {.tag = DS_TYPE_QUALIFIER, .specifier = {.q = (yyvsp[-1].tq)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
     }
-#line 1495 "y.tab.c"
+#line 1814 "y.tab.c"
     break;
 
   case 22: /* declaration_specifiers: type_qualifier  */
-#line 162 "rclang.y"
+#line 198 "rclang.y"
                      {
         declaration_specifier spec = {.tag = DS_TYPE_QUALIFIER, .specifier = {.q = (yyvsp[0].tq)}};
         (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
     }
-#line 1504 "y.tab.c"
+#line 1823 "y.tab.c"
     break;
 
   case 23: /* storage_class_specifier: TYPEDEF  */
-#line 169 "rclang.y"
+#line 205 "rclang.y"
               {
         (yyval.scs) = SCS_TYPEDEF;
     }
-#line 1512 "y.tab.c"
+#line 1831 "y.tab.c"
     break;
 
   case 24: /* storage_class_specifier: EXTERN  */
-#line 172 "rclang.y"
+#line 208 "rclang.y"
              {
         (yyval.scs) = SCS_EXTERN;
     }
-#line 1520 "y.tab.c"
+#line 1839 "y.tab.c"
     break;
 
   case 25: /* storage_class_specifier: STATIC  */
-#line 175 "rclang.y"
+#line 211 "rclang.y"
              {
         (yyval.scs) = SCS_STATIC;
     }
-#line 1528 "y.tab.c"
+#line 1847 "y.tab.c"
     break;
 
   case 26: /* storage_class_specifier: AUTO  */
-#line 178 "rclang.y"
+#line 214 "rclang.y"
            {
         (yyval.scs) = SCS_AUTO;
     }
-#line 1536 "y.tab.c"
+#line 1855 "y.tab.c"
     break;
 
   case 27: /* storage_class_specifier: REGISTER  */
-#line 181 "rclang.y"
+#line 217 "rclang.y"
                {
         (yyval.scs) = SCS_REGISTER;
     }
-#line 1544 "y.tab.c"
+#line 1863 "y.tab.c"
     break;
 
   case 28: /* type_qualifier: CONST  */
-#line 187 "rclang.y"
+#line 223 "rclang.y"
             {
         (yyval.tq) = TQ_CONST;
     }
-#line 1552 "y.tab.c"
+#line 1871 "y.tab.c"
     break;
 
   case 29: /* type_qualifier: VOLATILE  */
-#line 190 "rclang.y"
+#line 226 "rclang.y"
                {
         (yyval.tq) = TQ_VOLATILE;
     }
-#line 1560 "y.tab.c"
+#line 1879 "y.tab.c"
     break;
 
   case 32: /* type_specifier: VOID  */
-#line 201 "rclang.y"
+#line 237 "rclang.y"
            {
         (yyval.ts).tag = TS_VOID;
     }
-#line 1568 "y.tab.c"
+#line 1887 "y.tab.c"
     break;
 
   case 33: /* type_specifier: CHAR  */
-#line 204 "rclang.y"
+#line 240 "rclang.y"
            {
         (yyval.ts).tag = TS_CHAR;
     }
-#line 1576 "y.tab.c"
+#line 1895 "y.tab.c"
     break;
 
   case 34: /* type_specifier: SHORT  */
-#line 207 "rclang.y"
+#line 243 "rclang.y"
             {
         (yyval.ts).tag = TS_SHORT;
     }
-#line 1584 "y.tab.c"
+#line 1903 "y.tab.c"
     break;
 
   case 35: /* type_specifier: INT  */
-#line 210 "rclang.y"
+#line 246 "rclang.y"
           {
         (yyval.ts).tag = TS_INT;
     }
-#line 1592 "y.tab.c"
+#line 1911 "y.tab.c"
     break;
 
   case 36: /* type_specifier: LONG  */
-#line 213 "rclang.y"
+#line 249 "rclang.y"
            {
         (yyval.ts).tag = TS_LONG;
     }
-#line 1600 "y.tab.c"
+#line 1919 "y.tab.c"
     break;
 
   case 37: /* type_specifier: FLOAT  */
-#line 216 "rclang.y"
+#line 252 "rclang.y"
             {
         (yyval.ts).tag = TS_FLOAT;
     }
-#line 1608 "y.tab.c"
+#line 1927 "y.tab.c"
     break;
 
   case 38: /* type_specifier: DOUBLE  */
-#line 219 "rclang.y"
+#line 255 "rclang.y"
              { 
         (yyval.ts).tag = TS_DOUBLE; 
     }
-#line 1616 "y.tab.c"
+#line 1935 "y.tab.c"
     break;
 
   case 39: /* type_specifier: SIGNED  */
-#line 222 "rclang.y"
+#line 258 "rclang.y"
              {
         (yyval.ts).tag = TS_SIGNED;
     }
-#line 1624 "y.tab.c"
+#line 1943 "y.tab.c"
     break;
 
   case 40: /* type_specifier: UNSIGNED  */
-#line 225 "rclang.y"
+#line 261 "rclang.y"
                {
         (yyval.ts).tag = TS_UNSIGNED;
     }
-#line 1632 "y.tab.c"
+#line 1951 "y.tab.c"
     break;
 
   case 41: /* declarator: pointer direct_declarator  */
-#line 231 "rclang.y"
+#line 267 "rclang.y"
                                 {
         (yyval.declarator)->pointer = (yyvsp[-1].pointer);
         (yyval.declarator)->direct_decl = (yyvsp[0].direct_declarator);
     }
-#line 1641 "y.tab.c"
+#line 1960 "y.tab.c"
     break;
 
   case 42: /* declarator: direct_declarator  */
-#line 235 "rclang.y"
+#line 271 "rclang.y"
                         {
         (yyval.declarator)->pointer = NULL;
         (yyval.declarator)->direct_decl = (yyvsp[0].direct_declarator);
     }
-#line 1650 "y.tab.c"
+#line 1969 "y.tab.c"
     break;
 
   case 43: /* pointer: '*'  */
-#line 242 "rclang.y"
+#line 278 "rclang.y"
           {
         (yyval.pointer) = new_pointer(NULL);
     }
-#line 1658 "y.tab.c"
+#line 1977 "y.tab.c"
     break;
 
   case 44: /* pointer: '*' type_qualifier_list  */
-#line 245 "rclang.y"
+#line 281 "rclang.y"
                                {
         (yyval.pointer) = new_pointer(NULL);
     }
-#line 1666 "y.tab.c"
+#line 1985 "y.tab.c"
     break;
 
   case 45: /* pointer: '*' pointer  */
-#line 248 "rclang.y"
+#line 284 "rclang.y"
                   {
         (yyval.pointer) = new_pointer((yyvsp[0].pointer));
     }
-#line 1674 "y.tab.c"
+#line 1993 "y.tab.c"
     break;
 
   case 46: /* pointer: '*' type_qualifier_list pointer  */
-#line 251 "rclang.y"
+#line 287 "rclang.y"
                                       {
         (yyval.pointer) = new_pointer((yyvsp[0].pointer));
     }
-#line 1682 "y.tab.c"
+#line 2001 "y.tab.c"
     break;
 
   case 47: /* direct_declarator: identifier  */
-#line 257 "rclang.y"
+#line 293 "rclang.y"
                  {
+        (yyval.direct_declarator) = malloc(sizeof(direct_declarator));
         (yyval.direct_declarator)->tag = DDECL_IDENTIFIER;
         (yyval.direct_declarator)->op.identifier_decl = (yyvsp[0].ident);
     }
-#line 1691 "y.tab.c"
+#line 2011 "y.tab.c"
     break;
 
   case 48: /* direct_declarator: '(' declarator ')'  */
-#line 261 "rclang.y"
+#line 298 "rclang.y"
                          {
+        (yyval.direct_declarator) = malloc(sizeof(direct_declarator));
         (yyval.direct_declarator)->tag = DDECL_DECLARATOR;
         (yyval.direct_declarator)->op.decl = (yyvsp[-1].declarator);
     }
-#line 1700 "y.tab.c"
+#line 2021 "y.tab.c"
     break;
 
   case 49: /* direct_declarator: direct_declarator '(' parameter_type_list ')'  */
-#line 265 "rclang.y"
+#line 303 "rclang.y"
                                                     {
+        (yyval.direct_declarator) = malloc(sizeof(direct_declarator));
         (yyval.direct_declarator)->tag = DDECL_FUNCTION;
         (yyval.direct_declarator)->op.function_decl.function = (yyvsp[-3].direct_declarator);
         (yyval.direct_declarator)->op.function_decl.param_types = (yyvsp[-1].parameter_type_list);
     }
-#line 1710 "y.tab.c"
+#line 2032 "y.tab.c"
     break;
 
   case 50: /* direct_declarator: direct_declarator '(' ')'  */
-#line 270 "rclang.y"
+#line 309 "rclang.y"
                                 {
+        (yyval.direct_declarator) = malloc(sizeof(direct_declarator));
         (yyval.direct_declarator)->tag = DDECL_FUNCTION;
         (yyval.direct_declarator)->op.function_decl.function = (yyvsp[-2].direct_declarator);
 
     }
-#line 1720 "y.tab.c"
+#line 2043 "y.tab.c"
     break;
 
   case 51: /* identifier: IDENTIFIER  */
-#line 278 "rclang.y"
+#line 318 "rclang.y"
                  {
-        printf("%s\n", yytext);
+        printf("found identifier: %s\n", yytext);
         (yyval.ident) = new_identifier(yytext);
     }
-#line 1729 "y.tab.c"
+#line 2052 "y.tab.c"
     break;
 
   case 52: /* parameter_type_list: parameter_list  */
-#line 285 "rclang.y"
+#line 325 "rclang.y"
                      {
         (yyval.parameter_type_list).params = (yyvsp[0].parameter_list);
     }
-#line 1737 "y.tab.c"
+#line 2060 "y.tab.c"
     break;
 
   case 53: /* parameter_list: parameter_declaration  */
-#line 291 "rclang.y"
+#line 331 "rclang.y"
                             {
         (yyval.parameter_list) = new_parameter_list((yyvsp[0].parameter_declaration), NULL);
     }
-#line 1745 "y.tab.c"
+#line 2068 "y.tab.c"
     break;
 
   case 54: /* parameter_list: parameter_list ',' parameter_declaration  */
-#line 294 "rclang.y"
+#line 334 "rclang.y"
                                                {
         (yyval.parameter_list) = new_parameter_list((yyvsp[0].parameter_declaration), (yyvsp[-2].parameter_list));
     }
-#line 1753 "y.tab.c"
+#line 2076 "y.tab.c"
     break;
 
   case 55: /* parameter_declaration: declaration_specifiers declarator  */
-#line 300 "rclang.y"
+#line 340 "rclang.y"
                                         {
         (yyval.parameter_declaration).specifiers = (yyvsp[-1].decl_specifiers);
         (yyval.parameter_declaration).decl = (yyvsp[0].declarator);
     }
-#line 1762 "y.tab.c"
+#line 2085 "y.tab.c"
     break;
 
   case 56: /* parameter_declaration: declaration_specifiers  */
-#line 304 "rclang.y"
+#line 344 "rclang.y"
                              {
         (yyval.parameter_declaration).specifiers = (yyvsp[0].decl_specifiers);
         (yyval.parameter_declaration).decl = NULL;
     }
-#line 1771 "y.tab.c"
+#line 2094 "y.tab.c"
+    break;
+
+  case 57: /* declaration_list: declaration  */
+#line 351 "rclang.y"
+                  {
+        (yyval.declaration_list) = new_declaration_list((yyvsp[0].declaration), NULL);
+    }
+#line 2102 "y.tab.c"
+    break;
+
+  case 58: /* declaration_list: declaration_list declaration  */
+#line 354 "rclang.y"
+                                   {
+        (yyval.declaration_list) = new_declaration_list((yyvsp[0].declaration), (yyvsp[-1].declaration_list));
+    }
+#line 2110 "y.tab.c"
+    break;
+
+  case 59: /* statement: compound_statement  */
+#line 362 "rclang.y"
+                         {
+        (yyval.statement) = malloc(sizeof(statement));
+        (yyval.statement)->tag = STMT_COMPOUND;
+        (yyval.statement)->stmt.compound = (yyvsp[0].compound_statement);
+    }
+#line 2120 "y.tab.c"
+    break;
+
+  case 60: /* statement: jump_statement  */
+#line 367 "rclang.y"
+                     {
+        (yyval.statement) = malloc(sizeof(statement));
+        (yyval.statement)->tag = STMT_JUMP;
+        (yyval.statement)->stmt.jump = (yyvsp[0].jump_statement);
+    }
+#line 2130 "y.tab.c"
+    break;
+
+  case 61: /* statement_list: statement  */
+#line 375 "rclang.y"
+                {
+        (yyval.statement_list) = new_statement_list((yyvsp[0].statement), NULL);
+    }
+#line 2138 "y.tab.c"
+    break;
+
+  case 62: /* statement_list: statement_list statement  */
+#line 378 "rclang.y"
+                               {
+        (yyval.statement_list) = new_statement_list((yyvsp[0].statement), (yyvsp[-1].statement_list));
+    }
+#line 2146 "y.tab.c"
+    break;
+
+  case 63: /* compound_statement: '{' declaration_list statement_list '}'  */
+#line 384 "rclang.y"
+                                              {
+        (yyval.compound_statement) = malloc(sizeof(compound_statement));
+        (yyval.compound_statement)->declarations = (yyvsp[-2].declaration_list);
+        (yyval.compound_statement)->statements = (yyvsp[-1].statement_list);
+    }
+#line 2156 "y.tab.c"
+    break;
+
+  case 64: /* compound_statement: '{' declaration_list '}'  */
+#line 389 "rclang.y"
+                               {
+        (yyval.compound_statement) = malloc(sizeof(compound_statement));
+        (yyval.compound_statement)->declarations = (yyvsp[-1].declaration_list);
+        (yyval.compound_statement)->statements = NULL;
+    }
+#line 2166 "y.tab.c"
+    break;
+
+  case 65: /* compound_statement: '{' statement_list '}'  */
+#line 394 "rclang.y"
+                             {
+        (yyval.compound_statement) = malloc(sizeof(compound_statement));
+        (yyval.compound_statement)->declarations = NULL;
+        (yyval.compound_statement)->statements = (yyvsp[-1].statement_list);
+    }
+#line 2176 "y.tab.c"
+    break;
+
+  case 66: /* compound_statement: '{' '}'  */
+#line 399 "rclang.y"
+              {
+        (yyval.compound_statement) = malloc(sizeof(compound_statement));
+        (yyval.compound_statement)->declarations = NULL;
+        (yyval.compound_statement)->statements = NULL;
+    }
+#line 2186 "y.tab.c"
+    break;
+
+  case 67: /* jump_statement: GOTO identifier ';'  */
+#line 407 "rclang.y"
+                          {
+        (yyval.jump_statement) = malloc(sizeof(jump_statement));
+        (yyval.jump_statement)->tag = JUMP_GOTO;
+        (yyval.jump_statement)->jump.goto_ident = (yyvsp[-1].ident);
+    }
+#line 2196 "y.tab.c"
+    break;
+
+  case 68: /* jump_statement: CONTINUE ';'  */
+#line 412 "rclang.y"
+                   {
+        (yyval.jump_statement) = malloc(sizeof(jump_statement));
+        (yyval.jump_statement)->tag = JUMP_CONTINUE;
+    }
+#line 2205 "y.tab.c"
+    break;
+
+  case 69: /* jump_statement: BREAK ';'  */
+#line 416 "rclang.y"
+                {
+        (yyval.jump_statement) = malloc(sizeof(jump_statement));
+        (yyval.jump_statement)->tag = JUMP_BREAK;
+    }
+#line 2214 "y.tab.c"
+    break;
+
+  case 70: /* jump_statement: RETURN expression ';'  */
+#line 420 "rclang.y"
+                            {
+        (yyval.jump_statement) = malloc(sizeof(jump_statement));
+        (yyval.jump_statement)->tag = JUMP_RETURN;
+        (yyval.jump_statement)->jump.return_expr = (yyvsp[-1].expr);
+    }
+#line 2224 "y.tab.c"
+    break;
+
+  case 71: /* jump_statement: RETURN ';'  */
+#line 425 "rclang.y"
+                 {
+        (yyval.jump_statement) = malloc(sizeof(jump_statement));
+        (yyval.jump_statement)->tag = JUMP_RETURN;
+        (yyval.jump_statement)->jump.return_expr = NULL;
+    }
+#line 2234 "y.tab.c"
     break;
 
   case 73: /* expression: expression ',' assignment_expression  */
-#line 346 "rclang.y"
+#line 436 "rclang.y"
                                            {
         (yyval.expr) = new_multi_expression((yyvsp[-2].expr), (yyvsp[0].expr));
     }
-#line 1779 "y.tab.c"
+#line 2242 "y.tab.c"
     break;
 
   case 75: /* primary_expression: identifier  */
-#line 356 "rclang.y"
+#line 446 "rclang.y"
                  {
         (yyval.expr) = new_identifier_expression((yyvsp[0].ident));
     }
-#line 1787 "y.tab.c"
+#line 2250 "y.tab.c"
     break;
 
   case 76: /* primary_expression: STRING_LITERAL  */
-#line 359 "rclang.y"
+#line 449 "rclang.y"
                      {
         (yyval.expr) = new_string_literal_expression(yytext);
     }
-#line 1795 "y.tab.c"
+#line 2258 "y.tab.c"
+    break;
+
+  case 77: /* primary_expression: CONSTANT  */
+#line 452 "rclang.y"
+               {
+        printf("%s\n", yytext);
+        (yyval.expr) = malloc(sizeof(expression));
+        (yyval.expr)->tag = EXPR_INTEGER;
+        (yyval.expr)->op.integer_expr = 10;
+    }
+#line 2269 "y.tab.c"
     break;
 
   case 78: /* primary_expression: '(' expression ')'  */
-#line 363 "rclang.y"
+#line 458 "rclang.y"
                          {
         (yyval.expr) = (yyvsp[-1].expr);
     }
-#line 1803 "y.tab.c"
+#line 2277 "y.tab.c"
     break;
 
 
-#line 1807 "y.tab.c"
+#line 2281 "y.tab.c"
 
       default: break;
     }
@@ -1850,7 +2324,37 @@ yyerrlab:
   if (!yyerrstatus)
     {
       ++yynerrs;
-      yyerror (YY_("syntax error"));
+      {
+        yypcontext_t yyctx
+          = {yyssp, yytoken};
+        char const *yymsgp = YY_("syntax error");
+        int yysyntax_error_status;
+        yysyntax_error_status = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+        if (yysyntax_error_status == 0)
+          yymsgp = yymsg;
+        else if (yysyntax_error_status == -1)
+          {
+            if (yymsg != yymsgbuf)
+              YYSTACK_FREE (yymsg);
+            yymsg = YY_CAST (char *,
+                             YYSTACK_ALLOC (YY_CAST (YYSIZE_T, yymsg_alloc)));
+            if (yymsg)
+              {
+                yysyntax_error_status
+                  = yysyntax_error (&yymsg_alloc, &yymsg, &yyctx);
+                yymsgp = yymsg;
+              }
+            else
+              {
+                yymsg = yymsgbuf;
+                yymsg_alloc = sizeof yymsgbuf;
+                yysyntax_error_status = YYENOMEM;
+              }
+          }
+        yyerror (yymsgp);
+        if (yysyntax_error_status == YYENOMEM)
+          YYNOMEM;
+      }
     }
 
   if (yyerrstatus == 3)
@@ -1992,9 +2496,10 @@ yyreturnlab:
   if (yyss != yyssa)
     YYSTACK_FREE (yyss);
 #endif
-
+  if (yymsg != yymsgbuf)
+    YYSTACK_FREE (yymsg);
   return yyresult;
 }
 
-#line 368 "rclang.y"
+#line 463 "rclang.y"
 

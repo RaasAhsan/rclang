@@ -6,8 +6,13 @@
 #ifndef AST_H
 #define AST_H
 
+typedef struct translation_unit translation_unit;
+typedef struct external_declaration external_declaration;
+
 typedef struct statement statement;
 typedef struct statement_list statement_list;
+typedef struct jump_statement jump_statement;
+typedef struct compound_statement compound_statement;
 
 typedef struct expression expression;
 typedef struct expression_list expression_list;
@@ -45,6 +50,11 @@ typedef struct identifier {
 struct declaration {
     declaration_specifiers *specifiers;
     init_declarator_list *init_decls;
+};
+
+struct declaration_list {
+    declaration *decl;
+    declaration_list *next;
 };
 
 struct parameter_declaration {
@@ -149,7 +159,9 @@ struct direct_declarator {
 
 
 struct function_definition {
-
+    declaration_specifiers *specifiers;
+    declarator *declarator;
+    compound_statement *statement;
 };
 
 // Expressions
@@ -215,33 +227,33 @@ struct expression {
 
 // Statements
 
-typedef struct {
+struct compound_statement {
     declaration_list *declarations;
     statement_list *statements;
-} compound_statement;
+};
 
-typedef struct {
+struct jump_statement {
     enum {
-        goto_stmt,
-        continue_stmt,
-        break_stmt,
-        return_stmt
+        JUMP_GOTO,
+        JUMP_CONTINUE,
+        JUMP_BREAK,
+        JUMP_RETURN
     } tag;
     union {
-        identifier goto_stmt;
-        expression* return_stmt;
-    } op;
-} jump_statement;
+        identifier goto_ident;
+        expression* return_expr;
+    } jump;
+};
 
 struct statement {
     enum {
-        compound_stmt,
-        jump_stmt
+        STMT_COMPOUND,
+        STMT_JUMP
     } tag;
     union {
-        jump_statement *jump_stmt;
-        compound_statement *compound_stmt;
-    } op;
+        jump_statement *jump;
+        compound_statement *compound;
+    } stmt;
 };
 
 struct statement_list {
@@ -251,20 +263,21 @@ struct statement_list {
 
 // Module
 
-typedef struct translation_unit {
-
-} translation_unit;
-
-typedef struct external_declaration {
+struct external_declaration {
     enum {
         ED_DECLARATION,
         ED_FUNCTION_DEFINITION
     } op;
     struct {
-        declaration decl;
+        declaration *decl;
         function_definition func;
     } decl;
-} external_declaration;
+};
+
+struct translation_unit {
+    external_declaration decl;
+    translation_unit *next;
+};
 
 // builders
 
@@ -279,5 +292,8 @@ pointer *new_pointer(pointer *next);
 declaration_specifiers *new_declaration_specifiers(declaration_specifier spec, declaration_specifiers *next);
 init_declarator_list *new_init_declarator_list(init_declarator decl, init_declarator_list *next);
 parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *next);
+declaration_list *new_declaration_list(declaration *decl, declaration_list *next);
+statement_list *new_statement_list(statement *statement, statement_list *next);
+translation_unit *new_translation_unit(external_declaration decl, translation_unit *next);
 
 #endif

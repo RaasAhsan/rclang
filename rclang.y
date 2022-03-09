@@ -1,4 +1,5 @@
 %{
+// #define YYDEBUG 1
 #include <stdio.h>
 
 extern char *yytext;
@@ -18,6 +19,8 @@ int yywrap() {
 #include "ast.h"
 }
 
+%define parse.error verbose
+
 %token STRUCT
 %token IF ELSE
 %token AUTO TYPEDEF EXTERN STATIC REGISTER
@@ -34,7 +37,9 @@ int yywrap() {
 %start translation_unit
 
 %union {
-    translation_unit translation_unit;
+    translation_unit *translation_unit;
+    external_declaration external_declaration;
+    function_definition function_definition;
 
     identifier ident;
     expression *expr;
@@ -43,7 +48,8 @@ int yywrap() {
     type_specifier ts;
     storage_class_specifier scs;
 
-    declaration declaration;
+    declaration *declaration;
+    declaration_list *declaration_list;
     declaration_specifiers *decl_specifiers;
     pointer *pointer;
     declarator *declarator;
@@ -56,52 +62,75 @@ int yywrap() {
     parameter_type_list parameter_type_list;
     parameter_list *parameter_list;
     parameter_declaration parameter_declaration;
+
+    statement_list *statement_list;
+    statement *statement;
+    compound_statement *compound_statement;
+    jump_statement *jump_statement;
 }
 
 %type <translation_unit> translation_unit
+%type <external_declaration> external_declaration
+%type <function_definition> function_definition
+
 %type <ident> identifier
 %type <expr> expression assignment_expression primary_expression
 
-%type <tq> type_qualifier;
-%type <ts> type_specifier;
-%type <scs> storage_class_specifier;
+%type <tq> type_qualifier
+%type <ts> type_specifier
+%type <scs> storage_class_specifier
 
-%type <declaration> declaration;
-%type <declarator> declarator;
-%type <decl_specifiers> declaration_specifiers;
-%type <pointer> pointer;
-%type <direct_declarator> direct_declarator;
+%type <declaration> declaration
+%type <declaration_list> declaration_list
+%type <declarator> declarator
+%type <decl_specifiers> declaration_specifiers
+%type <pointer> pointer
+%type <direct_declarator> direct_declarator
 
-%type <parameter_declaration> parameter_declaration;
-%type <parameter_type_list> parameter_type_list;
-%type <parameter_list> parameter_list;
+%type <parameter_declaration> parameter_declaration
+%type <parameter_type_list> parameter_type_list
+%type <parameter_list> parameter_list
 
-%type <initializer> initializer;
-%type <init_declarator_list> init_declarator_list;
-%type <init_declarator> init_declarator;
+%type <initializer> initializer
+%type <init_declarator_list> init_declarator_list
+%type <init_declarator> init_declarator
+
+%type <statement_list> statement_list
+%type <statement> statement
+%type <compound_statement> compound_statement
+%type <jump_statement> jump_statement
 
 %%
 
 translation_unit
-    : external_declaration
-    | translation_unit external_declaration
+    : external_declaration {
+        $$ = new_translation_unit($1, NULL);
+    }
+    | translation_unit external_declaration {
+        $$ = new_translation_unit($2, $1);
+    }
     ;
 
 external_declaration
     : function_definition {
-        printf("Processed function definition.\n");
-        printf("Stuff\n");
+        $$.op = ED_FUNCTION_DEFINITION;
+        $$.decl.func = $1;
     }
-    | declaration
+    | declaration {
+        $$.op = ED_DECLARATION;
+        $$.decl.decl = $1;
+    }
     ;
 
 declaration
     : declaration_specifiers ';' {
-        $$.specifiers = $1;
+        $$ = malloc(sizeof(declaration));
+        $$->specifiers = $1;
     }
     | declaration_specifiers init_declarator_list ';' {
-        $$.specifiers = $1;
-        $$.init_decls = $2;
+        $$ = malloc(sizeof(declaration));
+        $$->specifiers = $1;
+        $$->init_decls = $2;
     }
     ;
 
@@ -127,13 +156,19 @@ init_declarator
 
 initializer
     : assignment_expression {
+        printf("assignment\n");
+        $$ = malloc(sizeof(initializer));
         $$->expr = $1;
     }
     ;
 
 function_definition
     : declaration_specifiers declarator declaration_list compound_statement 
-    | declaration_specifiers declarator compound_statement 
+    | declaration_specifiers declarator compound_statement {
+        $$.specifiers = $1;
+        $$.declarator = $2;
+        $$.statement = $3;
+    }
     | declarator declaration_list compound_statement 
     | declarator compound_statement
     ;
@@ -152,6 +187,7 @@ declaration_specifiers
         $$ = new_declaration_specifiers(spec, $2);
     }
     | type_specifier {
+        printf("found type %d\n", $1.tag);
         declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = $1}};
         $$ = new_declaration_specifiers(spec, NULL);
     }
@@ -255,19 +291,23 @@ pointer
 
 direct_declarator
     : identifier {
+        $$ = malloc(sizeof(direct_declarator));
         $$->tag = DDECL_IDENTIFIER;
         $$->op.identifier_decl = $1;
     }
     | '(' declarator ')' {
+        $$ = malloc(sizeof(direct_declarator));
         $$->tag = DDECL_DECLARATOR;
         $$->op.decl = $2;
     }
     | direct_declarator '(' parameter_type_list ')' {
+        $$ = malloc(sizeof(direct_declarator));
         $$->tag = DDECL_FUNCTION;
         $$->op.function_decl.function = $1;
         $$->op.function_decl.param_types = $3;
     }
     | direct_declarator '(' ')' {
+        $$ = malloc(sizeof(direct_declarator));
         $$->tag = DDECL_FUNCTION;
         $$->op.function_decl.function = $1;
 
@@ -276,7 +316,7 @@ direct_declarator
 
 identifier
     : IDENTIFIER {
-        printf("%s\n", yytext);
+        printf("found identifier: %s\n", yytext);
         $$ = new_identifier(yytext);
     }
     ;
@@ -308,35 +348,85 @@ parameter_declaration
     ;
 
 declaration_list
-    : declaration
-    | declaration_list declaration
+    : declaration {
+        $$ = new_declaration_list($1, NULL);
+    }
+    | declaration_list declaration {
+        $$ = new_declaration_list($2, $1);
+    }
     ;
 
 /* Statements */
 
 statement
-    : compound_statement
-    | jump_statement
+    : compound_statement {
+        $$ = malloc(sizeof(statement));
+        $$->tag = STMT_COMPOUND;
+        $$->stmt.compound = $1;
+    }
+    | jump_statement {
+        $$ = malloc(sizeof(statement));
+        $$->tag = STMT_JUMP;
+        $$->stmt.jump = $1;
+    }
     ;
 
 statement_list
-    : statement
-    | statement_list statement
+    : statement {
+        $$ = new_statement_list($1, NULL);
+    }
+    | statement_list statement {
+        $$ = new_statement_list($2, $1);
+    }
     ;
 
 compound_statement
-    : '{' declaration_list statement_list '}'
-    | '{' declaration_list '}'
-    | '{' statement_list '}'
-    | '{' '}'
+    : '{' declaration_list statement_list '}' {
+        $$ = malloc(sizeof(compound_statement));
+        $$->declarations = $2;
+        $$->statements = $3;
+    }
+    | '{' declaration_list '}' {
+        $$ = malloc(sizeof(compound_statement));
+        $$->declarations = $2;
+        $$->statements = NULL;
+    }
+    | '{' statement_list '}' {
+        $$ = malloc(sizeof(compound_statement));
+        $$->declarations = NULL;
+        $$->statements = $2;
+    }
+    | '{' '}' {
+        $$ = malloc(sizeof(compound_statement));
+        $$->declarations = NULL;
+        $$->statements = NULL;
+    }
     ;
 
 jump_statement
-    : GOTO identifier ';'
-    | CONTINUE ';'
-    | BREAK ';'
-    | RETURN expression ';'
-    | RETURN ';'
+    : GOTO identifier ';' {
+        $$ = malloc(sizeof(jump_statement));
+        $$->tag = JUMP_GOTO;
+        $$->jump.goto_ident = $2;
+    }
+    | CONTINUE ';' {
+        $$ = malloc(sizeof(jump_statement));
+        $$->tag = JUMP_CONTINUE;
+    }
+    | BREAK ';' {
+        $$ = malloc(sizeof(jump_statement));
+        $$->tag = JUMP_BREAK;
+    }
+    | RETURN expression ';' {
+        $$ = malloc(sizeof(jump_statement));
+        $$->tag = JUMP_RETURN;
+        $$->jump.return_expr = $2;
+    }
+    | RETURN ';' {
+        $$ = malloc(sizeof(jump_statement));
+        $$->tag = JUMP_RETURN;
+        $$->jump.return_expr = NULL;
+    }
     ;
 
 /* Expressions */
@@ -359,7 +449,12 @@ primary_expression
     | STRING_LITERAL {
         $$ = new_string_literal_expression(yytext);
     }
-    | CONSTANT
+    | CONSTANT {
+        printf("%s\n", yytext);
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_INTEGER;
+        $$->op.integer_expr = 10;
+    }
     | '(' expression ')' {
         $$ = $2;
     }

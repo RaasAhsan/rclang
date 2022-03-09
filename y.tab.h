@@ -45,7 +45,7 @@
 extern int yydebug;
 #endif
 /* "%code requires" blocks.  */
-#line 17 "rclang.y"
+#line 18 "rclang.y"
 
 #include "ast.h"
 
@@ -125,9 +125,11 @@ extern int yydebug;
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
 union YYSTYPE
 {
-#line 36 "rclang.y"
+#line 39 "rclang.y"
 
-    translation_unit translation_unit;
+    translation_unit *translation_unit;
+    external_declaration external_declaration;
+    function_definition function_definition;
 
     identifier ident;
     expression *expr;
@@ -136,7 +138,8 @@ union YYSTYPE
     type_specifier ts;
     storage_class_specifier scs;
 
-    declaration declaration;
+    declaration *declaration;
+    declaration_list *declaration_list;
     declaration_specifiers *decl_specifiers;
     pointer *pointer;
     declarator *declarator;
@@ -150,7 +153,12 @@ union YYSTYPE
     parameter_list *parameter_list;
     parameter_declaration parameter_declaration;
 
-#line 154 "y.tab.h"
+    statement_list *statement_list;
+    statement *statement;
+    compound_statement *compound_statement;
+    jump_statement *jump_statement;
+
+#line 162 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;

@@ -52,6 +52,27 @@ parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *n
     return head;
 }
 
+declaration_list *new_declaration_list(declaration *decl, declaration_list *next) {
+    declaration_list *head = (declaration_list*) malloc(sizeof(declaration_list));
+    head->decl = decl;
+    head->next = next;
+    return head;
+}
+
+statement_list *new_statement_list(statement *statement, statement_list *next) {
+    statement_list *head = (statement_list*) malloc(sizeof(statement_list));
+    head->stmt = statement;
+    head->next = next;
+    return head;
+}
+
+translation_unit *new_translation_unit(external_declaration decl, translation_unit *next) {
+    translation_unit *head = (translation_unit*) malloc(sizeof(translation_unit));
+    head->decl = decl;
+    head->next = next;
+    return head;
+}
+
 pointer *new_pointer(pointer *next) {
     pointer *ptr = (pointer*) malloc(sizeof(pointer));
     ptr->next = next;
