@@ -200,10 +200,30 @@ union YYSTYPE
 {
 #line 36 "rclang.y"
 
+    translation_unit translation_unit;
+
     identifier ident;
     expression *expr;
+    
+    type_qualifier tq;
+    type_specifier ts;
+    storage_class_specifier scs;
 
-#line 207 "y.tab.c"
+    declaration declaration;
+    declaration_specifiers *decl_specifiers;
+    pointer *pointer;
+    declarator *declarator;
+    direct_declarator *direct_declarator;
+
+    initializer *initializer;
+    init_declarator_list *init_declarator_list;
+    init_declarator init_declarator;
+
+    parameter_type_list parameter_type_list;
+    parameter_list *parameter_list;
+    parameter_declaration parameter_declaration;
+
+#line 227 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -674,16 +694,16 @@ static const yytype_int8 yytranslate[] =
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
-static const yytype_uint8 yyrline[] =
+static const yytype_int16 yyrline[] =
 {
-       0,    48,    48,    50,    54,    58,    62,    63,    69,    70,
-      74,    75,    79,    83,    84,    85,    86,    90,    91,    92,
-      93,    94,    95,    99,   100,   101,   102,   103,   107,   108,
-     112,   113,   117,   118,   119,   120,   121,   122,   123,   124,
-     125,   129,   130,   134,   135,   136,   137,   141,   142,   143,
-     144,   148,   155,   159,   160,   164,   165,   169,   170,   176,
-     177,   181,   182,   186,   187,   188,   189,   193,   194,   195,
-     196,   197,   203,   204,   210,   214,   217,   220,   221
+       0,    86,    86,    87,    91,    95,    99,   102,   109,   112,
+     118,   122,   129,   135,   136,   137,   138,   142,   146,   150,
+     154,   158,   162,   169,   172,   175,   178,   181,   187,   190,
+     196,   197,   201,   204,   207,   210,   213,   216,   219,   222,
+     225,   231,   235,   242,   245,   248,   251,   257,   261,   265,
+     270,   278,   285,   291,   294,   300,   304,   311,   312,   318,
+     319,   323,   324,   328,   329,   330,   331,   335,   336,   337,
+     338,   339,   345,   346,   352,   356,   359,   362,   363
 };
 #endif
 
@@ -1361,73 +1381,429 @@ yyreduce:
   YY_REDUCE_PRINT (yyn);
   switch (yyn)
     {
-  case 2: /* translation_unit: external_declaration  */
-#line 48 "rclang.y"
-                           {
-    }
-#line 1369 "y.tab.c"
-    break;
-
   case 4: /* external_declaration: function_definition  */
-#line 54 "rclang.y"
+#line 91 "rclang.y"
                           {
         printf("Processed function definition.\n");
         printf("Stuff\n");
     }
-#line 1378 "y.tab.c"
+#line 1391 "y.tab.c"
+    break;
+
+  case 6: /* declaration: declaration_specifiers ';'  */
+#line 99 "rclang.y"
+                                 {
+        (yyval.declaration).specifiers = (yyvsp[-1].decl_specifiers);
+    }
+#line 1399 "y.tab.c"
     break;
 
   case 7: /* declaration: declaration_specifiers init_declarator_list ';'  */
-#line 63 "rclang.y"
+#line 102 "rclang.y"
                                                       {
-        
+        (yyval.declaration).specifiers = (yyvsp[-2].decl_specifiers);
+        (yyval.declaration).init_decls = (yyvsp[-1].init_declarator_list);
     }
-#line 1386 "y.tab.c"
+#line 1408 "y.tab.c"
+    break;
+
+  case 8: /* init_declarator_list: init_declarator  */
+#line 109 "rclang.y"
+                      {
+        (yyval.init_declarator_list) = new_init_declarator_list((yyvsp[0].init_declarator), NULL);
+    }
+#line 1416 "y.tab.c"
+    break;
+
+  case 9: /* init_declarator_list: init_declarator_list ',' init_declarator  */
+#line 112 "rclang.y"
+                                               {
+        (yyval.init_declarator_list) = new_init_declarator_list((yyvsp[0].init_declarator), (yyvsp[-2].init_declarator_list));
+    }
+#line 1424 "y.tab.c"
+    break;
+
+  case 10: /* init_declarator: declarator  */
+#line 118 "rclang.y"
+                 {
+        (yyval.init_declarator).decl = (yyvsp[0].declarator);
+        (yyval.init_declarator).init = NULL;
+    }
+#line 1433 "y.tab.c"
+    break;
+
+  case 11: /* init_declarator: declarator '=' initializer  */
+#line 122 "rclang.y"
+                                 {
+        (yyval.init_declarator).decl = (yyvsp[-2].declarator);
+        (yyval.init_declarator).init = (yyvsp[0].initializer);
+    }
+#line 1442 "y.tab.c"
+    break;
+
+  case 12: /* initializer: assignment_expression  */
+#line 129 "rclang.y"
+                            {
+        (yyval.initializer)->expr = (yyvsp[0].expr);
+    }
+#line 1450 "y.tab.c"
+    break;
+
+  case 17: /* declaration_specifiers: storage_class_specifier declaration_specifiers  */
+#line 142 "rclang.y"
+                                                     {
+        declaration_specifier spec = {.tag = DS_STORAGE_CLASS_SPECIFIER, .specifier = {.sc = (yyvsp[-1].scs)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
+    }
+#line 1459 "y.tab.c"
+    break;
+
+  case 18: /* declaration_specifiers: storage_class_specifier  */
+#line 146 "rclang.y"
+                              {
+        declaration_specifier spec = {.tag = DS_STORAGE_CLASS_SPECIFIER, .specifier = {.sc = (yyvsp[0].scs)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
+    }
+#line 1468 "y.tab.c"
+    break;
+
+  case 19: /* declaration_specifiers: type_specifier declaration_specifiers  */
+#line 150 "rclang.y"
+                                            {
+        declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = (yyvsp[-1].ts)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
+    }
+#line 1477 "y.tab.c"
+    break;
+
+  case 20: /* declaration_specifiers: type_specifier  */
+#line 154 "rclang.y"
+                     {
+        declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = (yyvsp[0].ts)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
+    }
+#line 1486 "y.tab.c"
+    break;
+
+  case 21: /* declaration_specifiers: type_qualifier declaration_specifiers  */
+#line 158 "rclang.y"
+                                            {
+        declaration_specifier spec = {.tag = DS_TYPE_QUALIFIER, .specifier = {.q = (yyvsp[-1].tq)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, (yyvsp[0].decl_specifiers));
+    }
+#line 1495 "y.tab.c"
+    break;
+
+  case 22: /* declaration_specifiers: type_qualifier  */
+#line 162 "rclang.y"
+                     {
+        declaration_specifier spec = {.tag = DS_TYPE_QUALIFIER, .specifier = {.q = (yyvsp[0].tq)}};
+        (yyval.decl_specifiers) = new_declaration_specifiers(spec, NULL);
+    }
+#line 1504 "y.tab.c"
+    break;
+
+  case 23: /* storage_class_specifier: TYPEDEF  */
+#line 169 "rclang.y"
+              {
+        (yyval.scs) = SCS_TYPEDEF;
+    }
+#line 1512 "y.tab.c"
+    break;
+
+  case 24: /* storage_class_specifier: EXTERN  */
+#line 172 "rclang.y"
+             {
+        (yyval.scs) = SCS_EXTERN;
+    }
+#line 1520 "y.tab.c"
+    break;
+
+  case 25: /* storage_class_specifier: STATIC  */
+#line 175 "rclang.y"
+             {
+        (yyval.scs) = SCS_STATIC;
+    }
+#line 1528 "y.tab.c"
+    break;
+
+  case 26: /* storage_class_specifier: AUTO  */
+#line 178 "rclang.y"
+           {
+        (yyval.scs) = SCS_AUTO;
+    }
+#line 1536 "y.tab.c"
+    break;
+
+  case 27: /* storage_class_specifier: REGISTER  */
+#line 181 "rclang.y"
+               {
+        (yyval.scs) = SCS_REGISTER;
+    }
+#line 1544 "y.tab.c"
+    break;
+
+  case 28: /* type_qualifier: CONST  */
+#line 187 "rclang.y"
+            {
+        (yyval.tq) = TQ_CONST;
+    }
+#line 1552 "y.tab.c"
+    break;
+
+  case 29: /* type_qualifier: VOLATILE  */
+#line 190 "rclang.y"
+               {
+        (yyval.tq) = TQ_VOLATILE;
+    }
+#line 1560 "y.tab.c"
+    break;
+
+  case 32: /* type_specifier: VOID  */
+#line 201 "rclang.y"
+           {
+        (yyval.ts).tag = TS_VOID;
+    }
+#line 1568 "y.tab.c"
+    break;
+
+  case 33: /* type_specifier: CHAR  */
+#line 204 "rclang.y"
+           {
+        (yyval.ts).tag = TS_CHAR;
+    }
+#line 1576 "y.tab.c"
+    break;
+
+  case 34: /* type_specifier: SHORT  */
+#line 207 "rclang.y"
+            {
+        (yyval.ts).tag = TS_SHORT;
+    }
+#line 1584 "y.tab.c"
+    break;
+
+  case 35: /* type_specifier: INT  */
+#line 210 "rclang.y"
+          {
+        (yyval.ts).tag = TS_INT;
+    }
+#line 1592 "y.tab.c"
+    break;
+
+  case 36: /* type_specifier: LONG  */
+#line 213 "rclang.y"
+           {
+        (yyval.ts).tag = TS_LONG;
+    }
+#line 1600 "y.tab.c"
+    break;
+
+  case 37: /* type_specifier: FLOAT  */
+#line 216 "rclang.y"
+            {
+        (yyval.ts).tag = TS_FLOAT;
+    }
+#line 1608 "y.tab.c"
+    break;
+
+  case 38: /* type_specifier: DOUBLE  */
+#line 219 "rclang.y"
+             { 
+        (yyval.ts).tag = TS_DOUBLE; 
+    }
+#line 1616 "y.tab.c"
+    break;
+
+  case 39: /* type_specifier: SIGNED  */
+#line 222 "rclang.y"
+             {
+        (yyval.ts).tag = TS_SIGNED;
+    }
+#line 1624 "y.tab.c"
+    break;
+
+  case 40: /* type_specifier: UNSIGNED  */
+#line 225 "rclang.y"
+               {
+        (yyval.ts).tag = TS_UNSIGNED;
+    }
+#line 1632 "y.tab.c"
+    break;
+
+  case 41: /* declarator: pointer direct_declarator  */
+#line 231 "rclang.y"
+                                {
+        (yyval.declarator)->pointer = (yyvsp[-1].pointer);
+        (yyval.declarator)->direct_decl = (yyvsp[0].direct_declarator);
+    }
+#line 1641 "y.tab.c"
+    break;
+
+  case 42: /* declarator: direct_declarator  */
+#line 235 "rclang.y"
+                        {
+        (yyval.declarator)->pointer = NULL;
+        (yyval.declarator)->direct_decl = (yyvsp[0].direct_declarator);
+    }
+#line 1650 "y.tab.c"
+    break;
+
+  case 43: /* pointer: '*'  */
+#line 242 "rclang.y"
+          {
+        (yyval.pointer) = new_pointer(NULL);
+    }
+#line 1658 "y.tab.c"
+    break;
+
+  case 44: /* pointer: '*' type_qualifier_list  */
+#line 245 "rclang.y"
+                               {
+        (yyval.pointer) = new_pointer(NULL);
+    }
+#line 1666 "y.tab.c"
+    break;
+
+  case 45: /* pointer: '*' pointer  */
+#line 248 "rclang.y"
+                  {
+        (yyval.pointer) = new_pointer((yyvsp[0].pointer));
+    }
+#line 1674 "y.tab.c"
+    break;
+
+  case 46: /* pointer: '*' type_qualifier_list pointer  */
+#line 251 "rclang.y"
+                                      {
+        (yyval.pointer) = new_pointer((yyvsp[0].pointer));
+    }
+#line 1682 "y.tab.c"
+    break;
+
+  case 47: /* direct_declarator: identifier  */
+#line 257 "rclang.y"
+                 {
+        (yyval.direct_declarator)->tag = DDECL_IDENTIFIER;
+        (yyval.direct_declarator)->op.identifier_decl = (yyvsp[0].ident);
+    }
+#line 1691 "y.tab.c"
+    break;
+
+  case 48: /* direct_declarator: '(' declarator ')'  */
+#line 261 "rclang.y"
+                         {
+        (yyval.direct_declarator)->tag = DDECL_DECLARATOR;
+        (yyval.direct_declarator)->op.decl = (yyvsp[-1].declarator);
+    }
+#line 1700 "y.tab.c"
+    break;
+
+  case 49: /* direct_declarator: direct_declarator '(' parameter_type_list ')'  */
+#line 265 "rclang.y"
+                                                    {
+        (yyval.direct_declarator)->tag = DDECL_FUNCTION;
+        (yyval.direct_declarator)->op.function_decl.function = (yyvsp[-3].direct_declarator);
+        (yyval.direct_declarator)->op.function_decl.param_types = (yyvsp[-1].parameter_type_list);
+    }
+#line 1710 "y.tab.c"
+    break;
+
+  case 50: /* direct_declarator: direct_declarator '(' ')'  */
+#line 270 "rclang.y"
+                                {
+        (yyval.direct_declarator)->tag = DDECL_FUNCTION;
+        (yyval.direct_declarator)->op.function_decl.function = (yyvsp[-2].direct_declarator);
+
+    }
+#line 1720 "y.tab.c"
     break;
 
   case 51: /* identifier: IDENTIFIER  */
-#line 148 "rclang.y"
+#line 278 "rclang.y"
                  {
         printf("%s\n", yytext);
         (yyval.ident) = new_identifier(yytext);
     }
-#line 1395 "y.tab.c"
+#line 1729 "y.tab.c"
+    break;
+
+  case 52: /* parameter_type_list: parameter_list  */
+#line 285 "rclang.y"
+                     {
+        (yyval.parameter_type_list).params = (yyvsp[0].parameter_list);
+    }
+#line 1737 "y.tab.c"
+    break;
+
+  case 53: /* parameter_list: parameter_declaration  */
+#line 291 "rclang.y"
+                            {
+        (yyval.parameter_list) = new_parameter_list((yyvsp[0].parameter_declaration), NULL);
+    }
+#line 1745 "y.tab.c"
+    break;
+
+  case 54: /* parameter_list: parameter_list ',' parameter_declaration  */
+#line 294 "rclang.y"
+                                               {
+        (yyval.parameter_list) = new_parameter_list((yyvsp[0].parameter_declaration), (yyvsp[-2].parameter_list));
+    }
+#line 1753 "y.tab.c"
+    break;
+
+  case 55: /* parameter_declaration: declaration_specifiers declarator  */
+#line 300 "rclang.y"
+                                        {
+        (yyval.parameter_declaration).specifiers = (yyvsp[-1].decl_specifiers);
+        (yyval.parameter_declaration).decl = (yyvsp[0].declarator);
+    }
+#line 1762 "y.tab.c"
+    break;
+
+  case 56: /* parameter_declaration: declaration_specifiers  */
+#line 304 "rclang.y"
+                             {
+        (yyval.parameter_declaration).specifiers = (yyvsp[0].decl_specifiers);
+        (yyval.parameter_declaration).decl = NULL;
+    }
+#line 1771 "y.tab.c"
     break;
 
   case 73: /* expression: expression ',' assignment_expression  */
-#line 204 "rclang.y"
+#line 346 "rclang.y"
                                            {
-        (yyval.expr) = new_double_expression((yyvsp[-2].expr), (yyvsp[0].expr));
+        (yyval.expr) = new_multi_expression((yyvsp[-2].expr), (yyvsp[0].expr));
     }
-#line 1403 "y.tab.c"
+#line 1779 "y.tab.c"
     break;
 
   case 75: /* primary_expression: identifier  */
-#line 214 "rclang.y"
+#line 356 "rclang.y"
                  {
         (yyval.expr) = new_identifier_expression((yyvsp[0].ident));
     }
-#line 1411 "y.tab.c"
+#line 1787 "y.tab.c"
     break;
 
   case 76: /* primary_expression: STRING_LITERAL  */
-#line 217 "rclang.y"
+#line 359 "rclang.y"
                      {
         (yyval.expr) = new_string_literal_expression(yytext);
     }
-#line 1419 "y.tab.c"
+#line 1795 "y.tab.c"
     break;
 
   case 78: /* primary_expression: '(' expression ')'  */
-#line 221 "rclang.y"
+#line 363 "rclang.y"
                          {
         (yyval.expr) = (yyvsp[-1].expr);
     }
-#line 1427 "y.tab.c"
+#line 1803 "y.tab.c"
     break;
 
 
-#line 1431 "y.tab.c"
+#line 1807 "y.tab.c"
 
       default: break;
     }
@@ -1620,5 +1996,5 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 226 "rclang.y"
+#line 368 "rclang.y"
 

@@ -12,16 +12,145 @@ typedef struct statement_list statement_list;
 typedef struct expression expression;
 typedef struct expression_list expression_list;
 
+typedef struct function_definition function_definition;
+
 typedef struct declaration declaration;
 typedef struct declaration_list declaration_list;
 
-typedef struct module {
+typedef struct declarator declarator;
+typedef struct direct_declarator direct_declarator;
 
-} module;
+typedef struct declaration_specifiers declaration_specifiers;
+
+typedef struct pointer pointer;
+
+typedef struct init_declarator_list init_declarator_list;
+typedef struct init_declarator init_declarator;
+typedef struct initializer initializer;
+
+typedef struct parameter_type_list parameter_type_list;
+typedef struct parameter_list parameter_list;
+typedef struct parameter_declaration parameter_declaration;
+
+typedef enum type_qualifier type_qualifier;
+typedef struct type_specifier type_specifier;
+typedef enum storage_class_specifier storage_class_specifier;
 
 typedef struct identifier {
     char *name;
 } identifier;
+
+// Declarations
+
+struct declaration {
+    declaration_specifiers *specifiers;
+    init_declarator_list *init_decls;
+};
+
+struct parameter_declaration {
+    declaration_specifiers *specifiers;
+    declarator *decl;
+};
+
+struct parameter_type_list {
+    parameter_list *params;
+};
+
+struct parameter_list {
+    parameter_declaration decl;
+    parameter_list *next;
+};
+
+struct declarator {
+    pointer *pointer;
+    direct_declarator *direct_decl;
+};
+
+struct pointer {
+    // type_qualifier_list *qualifiers;
+    pointer *next;
+};
+
+
+enum type_qualifier {
+    TQ_CONST,
+    TQ_VOLATILE
+};
+
+struct type_specifier {
+    enum {
+        TS_VOID,
+        TS_CHAR,
+        TS_SHORT,
+        TS_INT,
+        TS_LONG,
+        TS_FLOAT,
+        TS_DOUBLE,
+        TS_SIGNED,
+        TS_UNSIGNED,
+    } tag;
+};
+
+enum storage_class_specifier {
+    SCS_TYPEDEF,
+    SCS_EXTERN,
+    SCS_STATIC,
+    SCS_AUTO,
+    SCS_REGISTER
+};
+
+typedef struct declaration_specifier {
+    enum {
+        DS_TYPE_SPECIFIER,
+        DS_TYPE_QUALIFIER,
+        DS_STORAGE_CLASS_SPECIFIER
+    } tag;
+    union {
+        type_specifier s;
+        type_qualifier q;
+        storage_class_specifier sc;
+    } specifier;
+} declaration_specifier;
+
+struct declaration_specifiers {
+    declaration_specifier specifier;
+    declaration_specifiers *next;
+};
+
+struct init_declarator {
+    declarator *decl;
+    initializer *init;
+};
+
+struct init_declarator_list {
+    init_declarator decl;
+    init_declarator_list *next;
+};
+
+struct initializer {
+    expression *expr;
+};
+
+struct direct_declarator {
+    enum {
+        DDECL_IDENTIFIER,
+        DDECL_DECLARATOR,
+        DDECL_FUNCTION
+    } tag;
+    union {
+        identifier identifier_decl;
+        declarator *decl;
+        struct {
+            direct_declarator *function;
+            parameter_type_list param_types;
+        } function_decl;
+    } op;
+};
+
+
+struct function_definition {
+
+};
 
 // Expressions
 
@@ -46,17 +175,17 @@ struct expression_list {
 
 struct expression {
     enum {
-        integer_expr,
-        string_expr,
-        identifier_expr,
-        add_expr,
-        subtract_expr,
-        multiply_expr,
-        divide_expr,
-        modulo_expr,
-        dereference_expr,
-        reference_expr,
-        double_expr
+        EXPR_INTEGER,
+        EXPR_STRING,
+        EXPR_IDENTIFIER,
+        EXPR_ADD,
+        EXPR_SUBTRACT,
+        EXPR_MULTIPLY,
+        EXPR_DIVIDE,
+        EXPR_MODULO,
+        EXPR_DEREFERENCE,
+        EXPR_REFERENCE,
+        EXPR_MULTI
     } tag;
     union {
         int integer_expr;
@@ -80,7 +209,7 @@ struct expression {
         } call_expr;
         projection_expr(direct_projection_expr);
         projection_expr(indirect_projection_expr);
-        binary_expr(double_expr);
+        binary_expr(multi_expr);
     } op;
 };
 
@@ -120,10 +249,35 @@ struct statement_list {
     statement_list *next;
 };
 
+// Module
+
+typedef struct translation_unit {
+
+} translation_unit;
+
+typedef struct external_declaration {
+    enum {
+        ED_DECLARATION,
+        ED_FUNCTION_DEFINITION
+    } op;
+    struct {
+        declaration decl;
+        function_definition func;
+    } decl;
+} external_declaration;
+
+// builders
+
 identifier new_identifier(char *name);
 
 expression *new_identifier_expression(identifier ident);
 expression *new_string_literal_expression(char* name);
-expression *new_double_expression(expression *left, expression *right);
+expression *new_multi_expression(expression *left, expression *right);
+
+pointer *new_pointer(pointer *next);
+
+declaration_specifiers *new_declaration_specifiers(declaration_specifier spec, declaration_specifiers *next);
+init_declarator_list *new_init_declarator_list(init_declarator decl, init_declarator_list *next);
+parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *next);
 
 #endif

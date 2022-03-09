@@ -127,10 +127,30 @@ union YYSTYPE
 {
 #line 36 "rclang.y"
 
+    translation_unit translation_unit;
+
     identifier ident;
     expression *expr;
+    
+    type_qualifier tq;
+    type_specifier ts;
+    storage_class_specifier scs;
 
-#line 134 "y.tab.h"
+    declaration declaration;
+    declaration_specifiers *decl_specifiers;
+    pointer *pointer;
+    declarator *declarator;
+    direct_declarator *direct_declarator;
+
+    initializer *initializer;
+    init_declarator_list *init_declarator_list;
+    init_declarator init_declarator;
+
+    parameter_type_list parameter_type_list;
+    parameter_list *parameter_list;
+    parameter_declaration parameter_declaration;
+
+#line 154 "y.tab.h"
 
 };
 typedef union YYSTYPE YYSTYPE;
