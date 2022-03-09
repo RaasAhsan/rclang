@@ -59,6 +59,13 @@ break                              { return BREAK; }
 "*"                                { return '*'; }
 ","                                { return ','; }
 "="                                { return '='; }
+"."                                { return '.'; }
+"["                                { return '['; }
+"]"                                { return ']'; }
+"++"                               { return OP_INC; }
+"--"                               { return OP_DEC; }
+"->"                               { return OP_PTR_PROJ; }
+
 
 
 {WHITESPACE}                       {}

@@ -34,6 +34,8 @@ int yywrap() {
 %token CONSTANT
 %token STRING_LITERAL
 
+%token OP_INC OP_DEC OP_PTR_PROJ
+
 %start translation_unit
 
 %union {
@@ -43,6 +45,7 @@ int yywrap() {
 
     identifier ident;
     expression *expr;
+    argument_expression_list *expr_list;
     
     type_qualifier tq;
     type_specifier ts;
@@ -74,7 +77,8 @@ int yywrap() {
 %type <function_definition> function_definition
 
 %type <ident> identifier
-%type <expr> expression assignment_expression primary_expression
+%type <expr> expression assignment_expression unary_expression postfix_expression primary_expression
+%type <expr_list> argument_expression_list
 
 %type <tq> type_qualifier
 %type <ts> type_specifier
@@ -156,7 +160,6 @@ init_declarator
 
 initializer
     : assignment_expression {
-        printf("assignment\n");
         $$ = malloc(sizeof(initializer));
         $$->expr = $1;
     }
@@ -187,7 +190,6 @@ declaration_specifiers
         $$ = new_declaration_specifiers(spec, $2);
     }
     | type_specifier {
-        printf("found type %d\n", $1.tag);
         declaration_specifier spec = {.tag = DS_TYPE_SPECIFIER, .specifier = {.s = $1}};
         $$ = new_declaration_specifiers(spec, NULL);
     }
@@ -439,8 +441,73 @@ expression
     ;
 
 assignment_expression
-    : primary_expression
+    : unary_expression
     ;
+
+unary_expression
+    : postfix_expression
+    | OP_INC unary_expression {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_PRE_INC;
+        $$->op.preincrement_expr = $2;
+    }
+    | OP_DEC unary_expression {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_PRE_DEC;
+        $$->op.predecrement_expr = $2;
+    }
+    ;
+
+postfix_expression
+    : primary_expression 
+    | postfix_expression '(' argument_expression_list ')' {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_CALL;
+        $$->op.call_expr.func = $1;
+        $$->op.call_expr.args = $3;
+    }
+    | postfix_expression '[' expression ']' {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_ARRAY_INDEX;
+        $$->op.array_index_expr.left = $1;
+        $$->op.array_index_expr.right = $3;
+    }
+    | postfix_expression OP_INC {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_POST_INC;
+        $$->op.postincrement_expr = $1;
+    }
+    | postfix_expression OP_DEC {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_POST_DEC;
+        $$->op.postdecrement_expr = $1;
+    }
+    | postfix_expression '.' identifier {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_DIRECT_PROJ;
+        $$->op.direct_projection_expr.base = $1;
+        $$->op.direct_projection_expr.member = $3;
+    }
+    | postfix_expression OP_PTR_PROJ identifier {
+        $$ = malloc(sizeof(expression));
+        $$->tag = EXPR_INDIRECT_PROJ;
+        $$->op.direct_projection_expr.base = $1;
+        $$->op.direct_projection_expr.member = $3;
+    }
+    ;
+
+argument_expression_list
+    : assignment_expression {
+        $$ = malloc(sizeof(argument_expression_list));
+        $$->expr = $1;
+        $$->next = NULL;
+    }
+    | argument_expression_list ',' assignment_expression {
+        $$ = malloc(sizeof(argument_expression_list));
+        $$->expr = $3;
+        $$->next = $1;
+    }
+
 
 primary_expression
     : identifier {

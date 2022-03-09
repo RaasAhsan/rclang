@@ -15,7 +15,7 @@ typedef struct jump_statement jump_statement;
 typedef struct compound_statement compound_statement;
 
 typedef struct expression expression;
-typedef struct expression_list expression_list;
+typedef struct argument_expression_list argument_expression_list;
 
 typedef struct function_definition function_definition;
 
@@ -166,9 +166,7 @@ struct function_definition {
 
 // Expressions
 
-#define unary_expr(name) struct { \
-    expression *value; \
-} name
+#define unary_expr(name) expression *name
 
 #define binary_expr(name) struct { \
     expression *left; \
@@ -180,9 +178,9 @@ struct function_definition {
     identifier member; \
 } name
 
-struct expression_list {
+struct argument_expression_list {
     expression *expr;
-    expression_list *next;
+    argument_expression_list *next;
 };
 
 struct expression {
@@ -197,7 +195,15 @@ struct expression {
         EXPR_MODULO,
         EXPR_DEREFERENCE,
         EXPR_REFERENCE,
-        EXPR_MULTI
+        EXPR_MULTI,
+        EXPR_PRE_INC,
+        EXPR_PRE_DEC,
+        EXPR_POST_INC,
+        EXPR_POST_DEC,
+        EXPR_DIRECT_PROJ,
+        EXPR_INDIRECT_PROJ,
+        EXPR_CALL,
+        EXPR_ARRAY_INDEX
     } tag;
     union {
         int integer_expr;
@@ -217,8 +223,9 @@ struct expression {
         unary_expr(sizeof_expr);
         struct {
             expression *func;
-            expression_list args;
+            argument_expression_list *args;
         } call_expr;
+        binary_expr(array_index_expr);
         projection_expr(direct_projection_expr);
         projection_expr(indirect_projection_expr);
         binary_expr(multi_expr);
