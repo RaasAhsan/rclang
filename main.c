@@ -1,5 +1,7 @@
 #include <stdio.h>
 
+#include "symtab.h"
+
 // extern int yylex();
 extern FILE* yyin;
 extern int yyparse();
@@ -18,12 +20,19 @@ int main() {
     // yydebug = 1;
 
     yyin = f;
-    yyparse();
+    // yyparse();
 
     // int token;
     // while ((token = yylex())) {
     //     printf("%d: %s\n", token, yytext);
     // }
+
+    symbol_table table;
+    symbol_table_init(&table);
+    symbol_table_insert(&table, "a", 3);
+    symbol_table_insert(&table, "b", 4);
+    symbol_table_insert(&table, "b", 8);
+    symbol_table_debug(&table);
 
     fclose(f);
 
