@@ -28,11 +28,16 @@ int main() {
     // }
 
     symbol_table table;
-    symbol_table_init(&table);
+    symbol_table_init(&table, NULL);
     symbol_table_insert(&table, "a", 3);
-    symbol_table_insert(&table, "b", 4);
     symbol_table_insert(&table, "b", 8);
-    symbol_table_debug(&table);
+
+    symbol_table table2;
+    symbol_table_init(&table2, &table);
+    symbol_table_insert(&table2, "c", 3);
+    symbol_table_insert(&table2, "b", 9);
+
+    symbol_table_debug(&table2);
 
     fclose(f);
 
