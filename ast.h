@@ -37,11 +37,13 @@ typedef struct parameter_type_list parameter_type_list;
 typedef struct parameter_list parameter_list;
 typedef struct parameter_declaration parameter_declaration;
 
+typedef struct type_qualifier_list type_qualifier_list;
 typedef enum type_qualifier type_qualifier;
 typedef struct type_specifier type_specifier;
 typedef enum storage_class_specifier storage_class_specifier;
 
 typedef struct type type;
+typedef struct type_list type_list;
 
 typedef struct identifier {
     char *name;
@@ -83,10 +85,14 @@ struct pointer {
     pointer *next;
 };
 
-
 enum type_qualifier {
     TQ_CONST,
     TQ_VOLATILE
+};
+
+struct type_qualifier_list {
+    type_qualifier tq;
+    type_qualifier_list *next;
 };
 
 struct type_specifier {
@@ -307,9 +313,29 @@ struct type {
         TYPE_LONG_DOUBLE,
         TYPE_STRUCT_OR_UNION,
         TYPE_ENUM,
-        TYPE_TYPEDEF
+        TYPE_TYPEDEF,
+        TYPE_POINTER,
+        TYPE_QUALIFIED,
+        TYPE_FUNCTION
     } tag;
-    identifier name;
+    union {
+        identifier tag_name;
+        identifier typedef_name;
+        type *pointer_base_type;
+        struct {
+            type *base_type;
+            type_qualifier_list *qualifiers;
+        } qualified;
+        struct {
+            type *return_type;
+            type_list *argument_types;
+        } function;
+    } data;
+};
+
+struct type_list {
+    type type;
+    type_list *next;
 };
 
 // builders
