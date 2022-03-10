@@ -1,6 +1,7 @@
 %{
 // #define YYDEBUG 1
 #include <stdio.h>
+#include "symtab.h"
 
 extern char *yytext;
 int yylex(void);
@@ -12,6 +13,17 @@ void yyerror(const char *str) {
 int yywrap() {
     return 1;
 }
+
+// void scope() {
+//     symbol_table *next = malloc(sizeof(symbol_table));
+//     symbol_table_init(next, symtable);
+//     symtable = next;
+// }
+
+// // Precondition: symtable is not root
+// void descope() {
+//     symtable = symtable->parent;
+// }
 
 %}
 

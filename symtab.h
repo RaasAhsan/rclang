@@ -2,31 +2,52 @@
 #define SYMTAB_H
 
 #define TABLE_SIZE 32
+#define ST_DECLARATIONS 0
+#define ST_TAGS 1
+#define ST_TYPEDEFS 2
 
 #include <stdlib.h>
 
 typedef struct symbol_table symbol_table;
-typedef struct symbol_chain symbol_chain;
+typedef struct symbol_list symbol_list;
 typedef struct symbol_entry symbol_entry;
+typedef struct declaration_symbol_entry declaration_symbol_entry;
 
 struct symbol_table {
-    symbol_chain *buckets[TABLE_SIZE];
+    symbol_list *symbols[3][TABLE_SIZE];
     symbol_table *parent;
 };
 
 struct symbol_entry {
-    char *key;
-    int data;
+    char *identifier;
 };
 
-struct symbol_chain {
-    symbol_entry entry;
-    symbol_chain *next;
+struct declaration_symbol_entry {
+    char *identifier;
+};
+
+struct tag_symbol_entry {
+    char *identifier;
+};
+
+struct typedef_symbol_entry {
+    char *identifier;
+};
+
+struct symbol_list {
+    symbol_entry *entry;
+    symbol_list *next;
 };
 
 void symbol_table_init(symbol_table *table, symbol_table *parent);
-void symbol_table_insert(symbol_table *table, char *key, int data);
-int symbol_table_search(symbol_table *table, char *key);
+void symbol_table_insert(symbol_table *table, int index, symbol_entry *new_entry);
+symbol_entry *symbol_table_search(symbol_table *table, int index, char *identifier);
+symbol_entry *symbol_table_search_nearest(symbol_table *table, int index, char *identifier);
+
+void symbol_table_insert_declaration(symbol_table *table, declaration_symbol_entry *new_entry);
+declaration_symbol_entry *symbol_table_search_declaration(symbol_table *table, int index, char *identifier);
+declaration_symbol_entry *symbol_table_search_nearest_declaration(symbol_table *table, int index, char *identifier);
+
 void symbol_table_debug(symbol_table *table);
 
 #endif
