@@ -8,6 +8,8 @@
 
 #include <stdlib.h>
 
+#include "ast.h"
+
 typedef struct symbol_table symbol_table;
 typedef struct symbol_list symbol_list;
 typedef struct symbol_entry symbol_entry;
@@ -24,14 +26,24 @@ struct symbol_entry {
 
 struct declaration_symbol_entry {
     char *identifier;
+    type type;
 };
 
 struct tag_symbol_entry {
     char *identifier;
+    enum {
+        TAG_STRUCT,
+        TAG_UNION,
+        TAG_ENUM
+    } tag_type;
+    union {
+
+    } *tag_data;
 };
 
 struct typedef_symbol_entry {
     char *identifier;
+    void *type;
 };
 
 struct symbol_list {
@@ -45,8 +57,8 @@ symbol_entry *symbol_table_search(symbol_table *table, int index, char *identifi
 symbol_entry *symbol_table_search_nearest(symbol_table *table, int index, char *identifier);
 
 void symbol_table_insert_declaration(symbol_table *table, declaration_symbol_entry *new_entry);
-declaration_symbol_entry *symbol_table_search_declaration(symbol_table *table, int index, char *identifier);
-declaration_symbol_entry *symbol_table_search_nearest_declaration(symbol_table *table, int index, char *identifier);
+declaration_symbol_entry *symbol_table_search_declaration(symbol_table *table, char *identifier);
+declaration_symbol_entry *symbol_table_search_nearest_declaration(symbol_table *table, char *identifier);
 
 void symbol_table_debug(symbol_table *table);
 

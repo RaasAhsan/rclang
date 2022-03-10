@@ -14,17 +14,6 @@ int yywrap() {
     return 1;
 }
 
-// void scope() {
-//     symbol_table *next = malloc(sizeof(symbol_table));
-//     symbol_table_init(next, symtable);
-//     symtable = next;
-// }
-
-// // Precondition: symtable is not root
-// void descope() {
-//     symtable = symtable->parent;
-// }
-
 %}
 
 %code requires {

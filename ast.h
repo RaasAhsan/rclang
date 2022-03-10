@@ -41,6 +41,8 @@ typedef enum type_qualifier type_qualifier;
 typedef struct type_specifier type_specifier;
 typedef enum storage_class_specifier storage_class_specifier;
 
+typedef struct type type;
+
 typedef struct identifier {
     char *name;
 } identifier;
@@ -284,6 +286,30 @@ struct external_declaration {
 struct translation_unit {
     external_declaration decl;
     translation_unit *next;
+};
+
+// types
+
+struct type {
+    enum {
+        TYPE_VOID,
+        TYPE_CHAR,
+        TYPE_SIGNED_CHAR,
+        TYPE_UNSIGNED_CHAR,
+        TYPE_SHORT,
+        TYPE_UNSIGNED_SHORT,
+        TYPE_INT,
+        TYPE_UNSIGNED_INT,
+        TYPE_LONG,
+        TYPE_UNSIGNED_LONG,
+        TYPE_FLOAT,
+        TYPE_DOUBLE,
+        TYPE_LONG_DOUBLE,
+        TYPE_STRUCT_OR_UNION,
+        TYPE_ENUM,
+        TYPE_TYPEDEF
+    } tag;
+    identifier name;
 };
 
 // builders

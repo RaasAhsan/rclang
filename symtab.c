@@ -91,12 +91,12 @@ void symbol_table_insert_declaration(symbol_table *table, declaration_symbol_ent
     symbol_table_insert(table, ST_DECLARATIONS, (symbol_entry*) new_entry);
 }
 
-declaration_symbol_entry *symbol_table_search_declaration(symbol_table *table, int index, char *identifier) {
-    return (declaration_symbol_entry*) symbol_table_search_declaration(table, ST_DECLARATIONS, identifier);
+declaration_symbol_entry *symbol_table_search_declaration(symbol_table *table, char *identifier) {
+    return (declaration_symbol_entry*) symbol_table_search(table, ST_DECLARATIONS, identifier);
 }
 
-declaration_symbol_entry *symbol_table_search_nearest_declaration(symbol_table *table, int index, char *identifier) {
-    return (declaration_symbol_entry*) symbol_table_search_nearest_declaration(table, ST_DECLARATIONS, identifier);
+declaration_symbol_entry *symbol_table_search_nearest_declaration(symbol_table *table, char *identifier) {
+    return (declaration_symbol_entry*) symbol_table_search_nearest(table, ST_DECLARATIONS, identifier);
 }
 
 void symbol_table_debug(symbol_table *table) {
