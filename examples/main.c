@@ -18,5 +18,17 @@ int main() {
     struct x *x2 = (struct x*) y;
     printf("%d\n", y->a);
     printf("%d\n", x2->b);
+
+    if (1 == 1) {
+        struct point {
+            int x, y;
+        };
+
+        struct point p;
+    }
+
+    struct point p;
+    p.x = 4;
+
     return 0;
 }
