@@ -78,3 +78,18 @@ pointer *new_pointer(pointer *next) {
     ptr->next = next;
     return ptr;
 }
+
+type_list *new_type_list(type *type, type_list *next) {
+    type_list *list = (type_list*) malloc(sizeof(type_list));
+    list->type = type;
+    list->next = next;
+    return list;
+}
+
+type *new_function_type(type *return_type, type_list *argument_types) {
+    type *t = (type*) malloc(sizeof(type));
+    t->tag = TYPE_FUNCTION;
+    t->data.function.return_type = return_type;
+    t->data.function.argument_types = argument_types;
+    return t;
+}

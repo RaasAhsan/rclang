@@ -1,10 +1,12 @@
 %{
 // #define YYDEBUG 1
 #include <stdio.h>
-#include "symtab.h"
+#include "ast.h"
 
 extern char *yytext;
 int yylex(void);
+
+translation_unit *unit;
 
 void yyerror(const char *str) {
     fprintf(stderr, "error: %s\n", str);
@@ -37,7 +39,7 @@ int yywrap() {
 
 %token OP_INC OP_DEC OP_PTR_PROJ
 
-%start translation_unit
+%start program
 
 %union {
     translation_unit *translation_unit;
@@ -107,12 +109,17 @@ int yywrap() {
 
 %%
 
+program
+    : translation_unit {
+        unit = $1;
+    }
+
 translation_unit
     : external_declaration {
         $$ = new_translation_unit($1, NULL);
     }
-    | translation_unit external_declaration {
-        $$ = new_translation_unit($2, $1);
+    | external_declaration translation_unit { // reversed to get right ordering
+        $$ = new_translation_unit($1, $2);
     }
     ;
 
@@ -173,7 +180,7 @@ function_definition
         $$.declarator = $2;
         $$.statement = $3;
     }
-    | declarator declaration_list compound_statement 
+    | declarator declaration_list compound_statement  
     | declarator compound_statement
     ;
 
@@ -268,10 +275,12 @@ type_specifier
 
 declarator
     : pointer direct_declarator {
+        $$ = malloc(sizeof(declarator));
         $$->pointer = $1;
         $$->direct_decl = $2;
     }
     | direct_declarator {
+        $$ = malloc(sizeof(declarator));
         $$->pointer = NULL;
         $$->direct_decl = $1;
     }
@@ -313,13 +322,12 @@ direct_declarator
         $$ = malloc(sizeof(direct_declarator));
         $$->tag = DDECL_FUNCTION;
         $$->op.function_decl.function = $1;
-
     }
     ;
 
 identifier
     : IDENTIFIER {
-        printf("found identifier: %s\n", yytext);
+        // printf("found identifier: %s\n", yytext);
         $$ = new_identifier(yytext);
     }
     ;
@@ -518,7 +526,7 @@ primary_expression
         $$ = new_string_literal_expression(yytext);
     }
     | CONSTANT {
-        printf("%s\n", yytext);
+        // printf("Read constant: %s\n", yytext);
         $$ = malloc(sizeof(expression));
         $$->tag = EXPR_INTEGER;
         $$->op.integer_expr = 10;

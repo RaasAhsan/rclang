@@ -26,7 +26,7 @@ struct symbol_entry {
 
 struct declaration_symbol_entry {
     char *identifier;
-    type type;
+    type *type;
 };
 
 struct tag_symbol_entry {

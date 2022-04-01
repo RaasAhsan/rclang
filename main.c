@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "symtab.h"
+#include "typer.h"
 
 // extern int yylex();
 extern FILE* yyin;
@@ -12,8 +13,10 @@ extern int yydebug;
 
 extern symbol_table *symtable;
 
+extern translation_unit *unit;
+
 int main() {
-    FILE *f = fopen("examples/main.c", "r");
+    FILE *f = fopen("examples/example.c", "r");
     if (f == NULL) {
         perror("Failed to open file");
         return 1;
@@ -25,9 +28,18 @@ int main() {
     symbol_table *symtable = malloc(sizeof(symbol_table));
     symbol_table_init(symtable, NULL);
 
-
+    // Run yacc parser, populate symbol table
     yyin = f;
     yyparse();
+
+    printf("%d\n", unit);
+
+    typecheck_translation_unit(unit);
+
+    fclose(f);
+
+    return 0;
+}
 
     // int token;
     // while ((token = yylex())) {
@@ -45,8 +57,3 @@ int main() {
     // symbol_table_insert(&table2, "b", 9);
 
     // symbol_table_debug(&table2);
-
-    fclose(f);
-
-    return 0;
-}

@@ -334,7 +334,7 @@ struct type {
 };
 
 struct type_list {
-    type type;
+    type *type;
     type_list *next;
 };
 
@@ -354,5 +354,8 @@ parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *n
 declaration_list *new_declaration_list(declaration *decl, declaration_list *next);
 statement_list *new_statement_list(statement *statement, statement_list *next);
 translation_unit *new_translation_unit(external_declaration decl, translation_unit *next);
+
+type_list *new_type_list(type *type, type_list *type_list);
+type *new_function_type(type *return_type, type_list *argument_types);
 
 #endif
