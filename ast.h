@@ -6,6 +6,8 @@
 #ifndef AST_H
 #define AST_H
 
+#include <stdint.h>
+
 typedef struct translation_unit translation_unit;
 typedef struct external_declaration external_declaration;
 
@@ -93,6 +95,31 @@ enum type_qualifier {
 struct type_qualifier_list {
     type_qualifier tq;
     type_qualifier_list *next;
+};
+
+// TODO: should we just use this representation?
+struct type_specifier_bitmap {
+    union {
+        struct {
+            unsigned int type_void : 1;
+            unsigned int type_char : 1;
+            unsigned int type_signed : 1;
+            unsigned int type_unsigned : 1;
+            unsigned int type_short : 1;
+            unsigned int type_int : 1;
+            unsigned int type_long : 1;
+            unsigned int type_float : 1;
+            unsigned int type_double : 1;
+            unsigned int type_struct_or_union : 1;
+            unsigned int type_enum : 1;
+            unsigned int type_typedef_name : 1;
+        } specifiers;
+        uint16_t value;
+    } bitmap;
+    // use for struct, union, enum, typedef data
+    union {
+
+    } data;
 };
 
 struct type_specifier {
