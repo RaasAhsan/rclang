@@ -86,10 +86,21 @@ type_list *new_type_list(type *type, type_list *next) {
     return list;
 }
 
+type *new_type() {
+    return (type*) malloc(sizeof(type));
+}
+
 type *new_function_type(type *return_type, type_list *argument_types) {
     type *t = (type*) malloc(sizeof(type));
     t->tag = TYPE_FUNCTION;
     t->data.function.return_type = return_type;
     t->data.function.argument_types = argument_types;
+    return t;
+}
+
+type *new_pointer_type(type *base_type) {
+    type *t = (type*) malloc(sizeof(type));
+    t->tag = TYPE_POINTER;
+    t->data.pointer_base_type = base_type;
     return t;
 }

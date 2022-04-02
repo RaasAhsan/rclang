@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 
 #include "typer.h"
 #include "ast.h"
@@ -60,6 +61,11 @@ const unsigned int TS_BITMAP_LONG_DOUBLE = TS_MAPPING_LONG | TS_MAPPING_DOUBLE;
 const unsigned int TS_BITMAP_STRUCT_OR_UNION = TS_MAPPING_STRUCT_OR_UNION;
 const unsigned int TS_BITMAP_ENUM = TS_MAPPING_ENUM;
 const unsigned int TS_BITMAP_TYPEDEF_NAME = TS_MAPPING_TYPEDEF_NAME;
+
+void type_error(char *message) {
+    fprintf(stderr, "type error: %s\n", message);
+    exit(1);
+}
 
 type *get_type_from_specifiers(declaration_specifiers *specifiers) {
     uint16_t bitmap;
@@ -150,6 +156,35 @@ type *get_type_from_specifiers(declaration_specifiers *specifiers) {
     return t;
 }
 
+int identifiers_equal(identifier *left, identifier *right) {
+    return strcmp(left->name, right->name) != 0;
+}
+
+int types_equal(type *left, type *right) {
+    if (left->tag != right->tag) {
+        return 0;
+    }
+
+    switch (left->tag) {
+        case TYPE_POINTER:
+            return types_equal(left->data.pointer_base_type, right->data.pointer_base_type);
+        case TYPE_STRUCT_OR_UNION:
+        case TYPE_ENUM:
+            return identifiers_equal(&left->data.tag_name, &right->data.tag_name);
+        case TYPE_TYPEDEF:
+            return identifiers_equal(&left->data.typedef_name, &right->data.typedef_name);
+        case TYPE_QUALIFIED: {
+            int base_equals = types_equal(left->data.qualified.base_type, right->data.qualified.base_type);
+            // TODO: compare qualifiers bitmap
+            return base_equals;
+        }
+        case TYPE_FUNCTION:
+            return 0;
+        default:
+            return 1;
+    }
+}
+
 // Bitmap end
 
 void scope() {
@@ -169,15 +204,24 @@ type *typecheck_expression(expression *expr) {
         case EXPR_IDENTIFIER:
             entry = symbol_table_search_declaration(symtable, expr->op.identifier_expr.name);
             if (entry == NULL) {
-                fprintf(stderr, "type error: undefined identifier\n");
-                exit(1);
+                type_error("type error: undefined identifier\n");
             } else {
 
             }
             break;
+        // TODO: make constants for these types?
+        case EXPR_INTEGER: {
+            type *t = new_type();
+            t->tag = TYPE_INT;
+            return t;
+        }
+        case EXPR_STRING: {
+            type *t = new_type();
+            t->tag = TYPE_CHAR;
+            return new_pointer_type(t);
+        }
         default: 
-            fprintf(stderr, "type error: unhandled expression case\n");
-            exit(1);
+            type_error("type error: unhandled expression case\n");
             break;
     }
 }
@@ -190,9 +234,17 @@ void typecheck_statement(statement *stmt) {
         case STMT_JUMP:
             typecheck_jump_statement(stmt->stmt.jump);
             break;
+        case STMT_EXPRESSION:
+            typecheck_expression_statement(stmt->stmt.expression);
+            break;
         default:
-            fprintf(stderr, "can't typecheck statement\n");
-            exit(1);
+            type_error("can't typecheck statement");
+    }
+}
+
+void typecheck_expression_statement(expression_statement stmt) {
+    if (stmt.expr != NULL) {
+        typecheck_expression(stmt.expr);
     }
 }
 
@@ -228,8 +280,43 @@ type_list *get_type_list_from_parameters(parameter_list *params) {
     return new_type_list(get_type_from_specifiers(params->decl.specifiers), get_type_list_from_parameters(params->next));
 }
 
-void typecheck_declaration(declaration decl) {
+type *apply_pointer_type(type *t, pointer *ptr) {
+    if (ptr == NULL) {
+        return t;
+    }
 
+    return apply_pointer_type(new_pointer_type(t), ptr->next);
+}
+
+void typecheck_declaration(declaration decl) {
+    type *specified_type = get_type_from_specifiers(decl.specifiers);
+
+    init_declarator_list *curr_init = decl.init_decls;
+    while (curr_init != NULL) {
+        type *decl_type = apply_pointer_type(specified_type, curr_init->decl.decl->pointer);
+        direct_declarator *ddecl = curr_init->decl.decl->direct_decl;
+        switch (ddecl->tag) {
+            case DDECL_IDENTIFIER: {
+                initializer *init;
+                declaration_symbol_entry *entry = symbol_table_new_declaration_entry(ddecl->op.identifier_decl.name, decl_type);
+                symbol_table_insert_declaration(symtable, entry);
+
+                init = curr_init->decl.init;
+                if (init != NULL) {
+                    type *expr_type = typecheck_expression(init->expr);
+                    // TODO: assert both types are structurally equal
+                    if (!types_equal(decl_type, expr_type)) {
+                        type_error("cannot initialize declaration with incompatible type\n");
+                    }
+                }
+
+                break;
+            }
+            default:
+                type_error("ddecl not supported");
+        }
+        curr_init = curr_init->next;
+    }
 }
 
 void typecheck_function_definition(function_definition fd) {
@@ -239,17 +326,13 @@ void typecheck_function_definition(function_definition fd) {
             type *return_type = get_type_from_specifiers(fd.specifiers);
             type_list *argument_types = get_type_list_from_parameters(fd.declarator->direct_decl->op.function_decl.param_types.params);
 
-            declaration_symbol_entry *entry = malloc(sizeof(declaration_symbol_entry));
-            entry->identifier = function_name.name;
-            entry->type = new_function_type(return_type, argument_types);
-
+            declaration_symbol_entry *entry = symbol_table_new_declaration_entry(function_name.name, new_function_type(return_type, argument_types));
             symbol_table_insert_declaration(symtable, entry);
 
             break;
         }
         default:
-            fprintf(stderr, "expected function declarator\n");
-            exit(1);
+            type_error("expected function declarator\n");
     }
 
     scope();

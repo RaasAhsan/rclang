@@ -13,6 +13,7 @@ typedef struct statement statement;
 typedef struct statement_list statement_list;
 typedef struct jump_statement jump_statement;
 typedef struct compound_statement compound_statement;
+typedef struct expression_statement expression_statement;
 
 typedef struct expression expression;
 typedef struct argument_expression_list argument_expression_list;
@@ -250,6 +251,10 @@ struct compound_statement {
     statement_list *statements;
 };
 
+struct expression_statement {
+    expression *expr;
+};
+
 struct jump_statement {
     enum {
         JUMP_GOTO,
@@ -266,11 +271,13 @@ struct jump_statement {
 struct statement {
     enum {
         STMT_COMPOUND,
-        STMT_JUMP
+        STMT_JUMP,
+        STMT_EXPRESSION,
     } tag;
     union {
         jump_statement *jump;
         compound_statement *compound;
+        expression_statement expression;
     } stmt;
 };
 
@@ -359,6 +366,8 @@ statement_list *new_statement_list(statement *statement, statement_list *next);
 translation_unit *new_translation_unit(external_declaration decl, translation_unit *next);
 
 type_list *new_type_list(type *type, type_list *type_list);
+type *new_type();
 type *new_function_type(type *return_type, type_list *argument_types);
+type *new_pointer_type(type *base_type);
 
 #endif

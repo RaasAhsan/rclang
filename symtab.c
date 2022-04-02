@@ -108,3 +108,10 @@ void symbol_table_debug(symbol_table *table) {
         symbol_table_debug(table->parent);
     }
 }
+
+declaration_symbol_entry *symbol_table_new_declaration_entry(char *name, type *t) {
+    declaration_symbol_entry *entry = malloc(sizeof(declaration_symbol_entry));
+    entry->identifier = name;
+    entry->type = t;
+    return entry;
+}

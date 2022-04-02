@@ -1,8 +1,5 @@
 
-int bar(int b) {
-    return bar(3);
-}
-
 int foo(int a) {
+    int x = "asdf";
     return 3;
 }

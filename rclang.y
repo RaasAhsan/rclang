@@ -73,6 +73,7 @@ int yywrap() {
     statement *statement;
     compound_statement *compound_statement;
     jump_statement *jump_statement;
+    expression_statement expression_statement;
 }
 
 %type <translation_unit> translation_unit
@@ -106,6 +107,7 @@ int yywrap() {
 %type <statement> statement
 %type <compound_statement> compound_statement
 %type <jump_statement> jump_statement
+%type <expression_statement> expression_statement
 
 %%
 
@@ -387,6 +389,13 @@ statement_list
     | statement_list statement {
         $$ = new_statement_list($2, $1);
     }
+    ;
+
+expression_statement
+    : expression ';' {
+        $$.expr = $1;
+    }
+    | ';'
     ;
 
 compound_statement
