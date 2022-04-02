@@ -200,30 +200,36 @@ void descope() {
 
 type *typecheck_expression(expression *expr) {
     declaration_symbol_entry *entry;
+    type *t;
     switch (expr->tag) {
-        case EXPR_IDENTIFIER:
+        case EXPR_IDENTIFIER: {
             entry = symbol_table_search_declaration(symtable, expr->op.identifier_expr.name);
             if (entry == NULL) {
-                type_error("type error: undefined identifier\n");
+                type_error("undefined identifier\n");
             } else {
 
             }
             break;
+        }
         // TODO: make constants for these types?
         case EXPR_INTEGER: {
-            type *t = new_type();
+            t = new_type();
             t->tag = TYPE_INT;
-            return t;
+            break;
         }
         case EXPR_STRING: {
-            type *t = new_type();
-            t->tag = TYPE_CHAR;
-            return new_pointer_type(t);
+            type *base = new_type();
+            base->tag = TYPE_CHAR;
+            t = new_pointer_type(base);
+            break;
         }
         default: 
-            type_error("type error: unhandled expression case\n");
+            type_error("unhandled expression case\n");
             break;
     }
+
+    expr->t = t;
+    return t;
 }
 
 void typecheck_statement(statement *stmt) {

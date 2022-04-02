@@ -242,6 +242,7 @@ struct expression {
         projection_expr(indirect_projection_expr);
         binary_expr(multi_expr);
     } op;
+    type *t;
 };
 
 // Statements
