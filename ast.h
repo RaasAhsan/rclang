@@ -57,7 +57,7 @@ struct declaration {
 };
 
 struct declaration_list {
-    declaration *decl;
+    declaration decl;
     declaration_list *next;
 };
 
@@ -287,7 +287,7 @@ struct external_declaration {
         ED_FUNCTION_DEFINITION
     } op;
     struct {
-        declaration *decl;
+        declaration decl;
         function_definition func;
     } decl;
 };
@@ -354,7 +354,7 @@ pointer *new_pointer(pointer *next);
 declaration_specifiers *new_declaration_specifiers(declaration_specifier spec, declaration_specifiers *next);
 init_declarator_list *new_init_declarator_list(init_declarator decl, init_declarator_list *next);
 parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *next);
-declaration_list *new_declaration_list(declaration *decl, declaration_list *next);
+declaration_list *new_declaration_list(declaration decl, declaration_list *next);
 statement_list *new_statement_list(statement *statement, statement_list *next);
 translation_unit *new_translation_unit(external_declaration decl, translation_unit *next);
 

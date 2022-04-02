@@ -54,7 +54,7 @@ int yywrap() {
     type_specifier ts;
     storage_class_specifier scs;
 
-    declaration *declaration;
+    declaration declaration;
     declaration_list *declaration_list;
     declaration_specifiers *decl_specifiers;
     pointer *pointer;
@@ -136,13 +136,11 @@ external_declaration
 
 declaration
     : declaration_specifiers ';' {
-        $$ = malloc(sizeof(declaration));
-        $$->specifiers = $1;
+        $$.specifiers = $1;
     }
     | declaration_specifiers init_declarator_list ';' {
-        $$ = malloc(sizeof(declaration));
-        $$->specifiers = $1;
-        $$->init_decls = $2;
+        $$.specifiers = $1;
+        $$.init_decls = $2;
     }
     ;
 

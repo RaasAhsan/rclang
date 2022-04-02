@@ -52,7 +52,7 @@ parameter_list *new_parameter_list(parameter_declaration decl, parameter_list *n
     return head;
 }
 
-declaration_list *new_declaration_list(declaration *decl, declaration_list *next) {
+declaration_list *new_declaration_list(declaration decl, declaration_list *next) {
     declaration_list *head = (declaration_list*) malloc(sizeof(declaration_list));
     head->decl = decl;
     head->next = next;

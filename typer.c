@@ -2,51 +2,11 @@
 #include <stdio.h>
 #include <stdint.h>
 
+#include "typer.h"
 #include "ast.h"
 #include "symtab.h"
 
 symbol_table *symtable;
-
-void scope() {
-    symbol_table *next = malloc(sizeof(symbol_table));
-    symbol_table_init(next, symtable);
-    symtable = next;
-}
-
-// Precondition: symtable is not root
-void descope() {
-    symtable = symtable->parent;
-}
-
-type typecheck_expression(expression *expr) {
-    declaration_symbol_entry *entry;
-    switch (expr->tag) {
-        case EXPR_IDENTIFIER:
-            entry = symbol_table_search_declaration(symtable, expr->op.identifier_expr.name);
-            if (entry == NULL) {
-                fprintf(stderr, "type error: undefined identifier\n");
-                exit(1);
-            } else {
-
-            }
-            break;
-        default: 
-            fprintf(stderr, "type error: unhandled expression case\n");
-            exit(1);
-            break;
-    }
-}
-
-void typecheck_compound_statement(compound_statement *stmt) {
-    scope();
-
-    descope();
-}
-
-void typecheck_declaration(declaration *decl) {
-
-}
-
 
 const unsigned int TS_MAPPING_VOID = 1 << TS_VOID;
 const unsigned int TS_MAPPING_CHAR = 1 << TS_CHAR;
@@ -190,6 +150,74 @@ type *get_type_from_specifiers(declaration_specifiers *specifiers) {
     return t;
 }
 
+// Bitmap end
+
+void scope() {
+    symbol_table *next = malloc(sizeof(symbol_table));
+    symbol_table_init(next, symtable);
+    symtable = next;
+}
+
+// Precondition: symtable is not root
+void descope() {
+    symtable = symtable->parent;
+}
+
+type *typecheck_expression(expression *expr) {
+    declaration_symbol_entry *entry;
+    switch (expr->tag) {
+        case EXPR_IDENTIFIER:
+            entry = symbol_table_search_declaration(symtable, expr->op.identifier_expr.name);
+            if (entry == NULL) {
+                fprintf(stderr, "type error: undefined identifier\n");
+                exit(1);
+            } else {
+
+            }
+            break;
+        default: 
+            fprintf(stderr, "type error: unhandled expression case\n");
+            exit(1);
+            break;
+    }
+}
+
+void typecheck_statement(statement *stmt) {
+    switch (stmt->tag) {
+        case STMT_COMPOUND:
+            typecheck_compound_statement(stmt->stmt.compound);
+            break;
+        case STMT_JUMP:
+            typecheck_jump_statement(stmt->stmt.jump);
+            break;
+        default:
+            fprintf(stderr, "can't typecheck statement\n");
+            exit(1);
+    }
+}
+
+void typecheck_jump_statement(jump_statement *stmt) {
+
+}
+    
+void typecheck_compound_statement(compound_statement *stmt) {
+    scope();
+
+    declaration_list *curr_decl = stmt->declarations;
+    while (curr_decl != NULL) {
+        typecheck_declaration(curr_decl->decl);
+        curr_decl = curr_decl->next;
+    }
+
+    statement_list *curr_stmt = stmt->statements;
+    while (curr_stmt != NULL) {
+        typecheck_statement(curr_stmt->stmt);
+        curr_stmt = curr_stmt->next;
+    }
+
+    descope();
+}
+
 type_list *get_type_list_from_parameters(parameter_list *params) {
     if (params == NULL) {
         return NULL;
@@ -198,6 +226,10 @@ type_list *get_type_list_from_parameters(parameter_list *params) {
     // TODO: might need to look at declarator to see if is a function type
 
     return new_type_list(get_type_from_specifiers(params->decl.specifiers), get_type_list_from_parameters(params->next));
+}
+
+void typecheck_declaration(declaration decl) {
+
 }
 
 void typecheck_function_definition(function_definition fd) {
